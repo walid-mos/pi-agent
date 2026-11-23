@@ -1,0 +1,21 @@
+# Allowlist: ignore everything, then track only user configuration.
+# Never track auth.json (credentials), sessions/, install/, bin/, tmp/ or caches.
+/*
+
+!/.gitignore
+!/README.md
+!/settings.json
+!/keybindings.json
+!/AGENTS.md
+!/AGENTS.override.md
+!/SYSTEM.md
+!/APPEND_SYSTEM.md
+!/extensions/
+!/skills/
+!/prompts/
+!/themes/
+
+# mcp.json and models.json can hold API keys. Before tracking them, make sure
+# every secret is a $VAR or !command reference, then add them here:
+# !/mcp.json
+# !/models.json
