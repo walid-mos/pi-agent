@@ -15,6 +15,10 @@
 !/prompts/
 !/themes/
 
+# models.json is rendered by chezmoi from models.json.tmpl with machine-local values (gateway address):
+# track the template, never the rendered file.
+!/models.json.tmpl
+
 # mcp.json and models.json can hold API keys. Before tracking them, make sure
 # every secret is a $VAR or !command reference, then add them here:
 # !/mcp.json
