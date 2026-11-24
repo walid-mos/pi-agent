@@ -2,5 +2,7 @@
   "lastChangelogVersion": "1.6.0",
   "packages": [
     "~/.config/pi-vendor/local/decide"
-  ]
+  ],
+  "defaultProvider": "magpie",
+  "defaultModel": "group/router"
 }
