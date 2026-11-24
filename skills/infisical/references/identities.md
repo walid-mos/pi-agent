@@ -20,6 +20,8 @@ Keep one line per identity. No secret values, no client IDs.
 | Identity | Auth | Vault (role) | Where the client secret lives | Created |
 |---|---|---|---|---|
 | `magpie-reader` | Universal Auth, TTL 1 h | `magpie` (Viewer) | Magpie LXC, `~magpie/.config/infisical/magpie-reader.env` | 2026-11-24 |
+| `ops-reader` | Universal Auth, TTL 1 h | `ops` (Viewer) | ops LXC, `/etc/ops/ops-reader.env` (user `ops`) | 2026-11-24 |
+| `relay-reader` | Universal Auth, TTL 1 h | `relay` (Viewer) | relay LXC, `/etc/relay/relay-reader.env` (user `relay`) | 2026-11-24 |
 
 Copies of a secret in more than one vault: none.
 
