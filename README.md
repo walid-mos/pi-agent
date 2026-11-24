@@ -12,6 +12,14 @@ User-level configuration for [Pi](https://github.com/earendil-works/pi), checked
 
 Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.config/pi-vendor`, and declared in `settings.json` as local packages.
 
+- `models.json.tmpl`: the `magpie` provider (the Magpie gateway's routing groups). chezmoi renders it into
+  `models.json` with the machine's gateway address; the rendered file is never tracked. The key lives in `auth.json`
+  as a command (`"key": "!infisical secrets get MAGPIE_KEY_<machine> ..."`), so it is never written to disk.
+- `skills/infisical`, `skills/tailscale`: our rules for secrets, vaults, identities and the tailnet policy. They read
+  every homelab value from Infisical at run time (`~/.config/infisical/core.env`, `core:/homelab/reference`); none is
+  written in this repo. The generic Infisical documentation comes from the vendored `infisical-ai-skills` package.
+- `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
+
 ## New machine
 
 ```sh
