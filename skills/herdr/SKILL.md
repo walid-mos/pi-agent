@@ -21,11 +21,15 @@ If a command is missing or behaves differently from what you expect, read `hc <c
 
 ## Our rules
 
-- **Never install Herdr on another machine.** `hc machine add` is fine to connect a machine where Herdr is already
-  installed; `--install` (or any copy of herdr-core to another machine) needs the user's explicit go first.
-- Check which machines are connected (`hc machine ls`) before targeting `machine/t…` addresses; do not add or
-  remove machines unless asked.
-- Name every terminal you start and give it an exact scope; clean up the terminals you started when the task ends,
-  unless the user wants them kept.
+- **Copying herdr-core to another machine needs the user's explicit go** for that machine: `hc machine add --install`,
+  `hc machine update`, or any other copy. A request that names the machine and asks to set Herdr up there is that go;
+  otherwise ask. `hc machine add` without `--install`, to a machine that already has herdr-core, is fine.
+- Machine names: read them with `hc machine ls` (the `name` field is the address prefix, as in `name/t7`). If the
+  user's wording does not match one name exactly, ask; do not add, rename or remove machines unless asked.
+- A new machine must first be reachable over SSH with a verified host key (see the `tailscale` skill and
+  `~/.ssh/AGENTS.md`); an agent CLI on it gets its credentials through the `infisical` skill, never typed in a terminal.
+- Name every terminal you start and give it an exact scope. Clean up the terminals you started when the task ends,
+  except those the user wants to watch or keep: start those with `--outlive-parent` and, to show one, give it a tab
+  (`herdr-app do terminal.keep --terminal <id> --place tab`, see `herdr-app --skill`).
 - Long or slow commands (builds, installs, deploys, tests) run in an hc terminal, not in your own shell.
 - Secrets follow the `infisical` skill: never type a secret into a terminal, a `send` or a task description.
