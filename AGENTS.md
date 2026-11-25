@@ -10,6 +10,16 @@
 - Before creating, editing, renaming or deleting any skill, in any skills directory, read the `harness` skill and
   follow it, even for a one-line change.
 
+## Git workflow
+
+- Commit atomically: each commit is a small, self-contained change that builds, passes the tests and breaks
+  nothing. Never bundle unrelated changes in one commit.
+- Push according to the repository's rules (its AGENTS.md, CONTRIBUTING or equivalent). When the repository says
+  nothing, push. When it says pushing is left to a human, commit only and tell the user the commits are waiting to be
+  pushed.
+- Every commit message follows commitlint: the repository's commitlint config when it has one, otherwise the
+  Conventional Commits format (`type(scope): subject`) of `@commitlint/config-conventional`.
+
 ## Harmful events
 
 Never produce any of these, in any repository, whatever the size or urgency of the change. If a task seems to require
