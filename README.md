@@ -10,7 +10,9 @@ User-level configuration for [Pi](https://github.com/earendil-works/pi), checked
 - `AGENTS.md`: global instructions applied in every directory.
 - `extensions/`, `skills/`, `prompts/`, `themes/`: user resources, when present.
 
-Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.config/pi/pi-vendor`, and declared in `settings.json` as local packages.
+Third-party packages and private skills live outside this repository, in `~/.config/pi` (see its README): `settings.json`
+declares that directory once as a local package, and its `package.json` picks up the skills and extensions of the
+repositories cloned there. This repository names none of them.
 
 - `models.json.tmpl`: the `magpie` provider (the Magpie gateway's routing groups). chezmoi renders it into
   `models.json` with the machine's gateway address; the rendered file is never tracked. The key lives in `auth.json`
@@ -25,15 +27,14 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
   `scripts/check.sh`, the mechanical checks. `AGENTS.md` makes it mandatory for any skill change.
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
-Private skills and extensions live in private repositories cloned under `~/.config/pi/` by the dotfiles, which link
-each one's `skills/` and `extensions/` into `skills/<name>` and `extensions/<name>` here and hide the links through
-this checkout's `.git/info/exclude`. Pi loads them like the resources of this repository, which names none of them.
 
 ## New machine
 
+The dotfiles (chezmoi) clone this repository into `~/.pi/agent` and set up `~/.config/pi` with the repositories it
+holds. Without the dotfiles:
+
 ```sh
 git clone git@github.com:walid-mos/pi-agent.git ~/.pi/agent   # before installing Pi, or merge into the existing dir
-git clone git@github.com:walid-mos/pi-vendor.git ~/.config/pi/pi-vendor
 ```
 
 Then log in to providers again (for example `/login magpie`), since `auth.json` is not tracked.

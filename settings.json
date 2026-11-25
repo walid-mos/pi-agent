@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "1.6.0",
   "packages": [
-    "~/.config/pi/pi-vendor/packages/infisical-ai-skills"
+    "~/.config/pi"
   ],
   "defaultProvider": "magpie",
   "defaultModel": "group/router",
