@@ -26,6 +26,7 @@ in the skill. If there is neither, there is nothing to encode: tell the user and
 | applies to every task in every repository | `~/.pi/agent/AGENTS.md`, in a line or two |
 | applies to one repository | that repository's `AGENTS.md` |
 | matters only for one kind of task | a skill: ours in `~/.pi/agent/skills/<name>/`, a project's in that project |
+| is private to one client or company (its names, repositories, colleagues, tools) | a skill in that domain's private repository, `~/.config/pi/pi-<domain>/skills/`, never in this public repository |
 | is third-party product documentation | a vendored package in `~/.config/pi/pi-vendor`, which we never edit |
 
 Our rules about a vendored skill's product go in a skill of ours whose description says it takes precedence (as

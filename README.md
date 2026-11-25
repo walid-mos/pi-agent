@@ -23,6 +23,10 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
 
+Private skills live in private repositories cloned under `~/.config/pi/` by the dotfiles, which link each one's
+`skills/` into `skills/` here and hide the link through this checkout's `.git/info/exclude`. Pi loads them like the
+skills of this repository, which names none of them.
+
 ## New machine
 
 ```sh
