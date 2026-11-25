@@ -23,7 +23,8 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
 - `extensions/magpie-mcp.ts`: connects Pi to Magpie's MCP hub (Jira and Confluence, whatever the machine's gateway key
-  may use), read-only: write tools are hidden. Address and key come from the `magpie` provider, as for `decide`.
+  may use), every tool exposed. When an agent may write there is decided by the skills (the user validates every
+  write). Address and key come from the `magpie` provider, as for `decide`.
 
 Private skills live in private repositories cloned under `~/.config/pi/` by the dotfiles, which link each one's
 `skills/` into `skills/` here and hide the link through this checkout's `.git/info/exclude`. Pi loads them like the
