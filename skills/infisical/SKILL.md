@@ -81,8 +81,9 @@ repository is not a decision: without the `AGENTS.md` lines, ask.
 Free self-hosted Infisical has only built-in project roles (Admin, Member, Viewer, No Access): an identity with access to
 a project reads **all** of it. Hence:
 
-- **One vault (project) per project** (a repository or a service), and a vault boundary only counts if it matches a
-  machine (or sandbox) boundary.
+- **One vault (project) per trust zone** for the secrets outside a repository (tools, keys, homelab), and a vault
+  boundary only counts if it matches a machine (or sandbox) boundary. A repository's environment is the exception:
+  its own vault, as in "Secrets of a repository".
 - **One identity per workload**, with access to **exactly one vault**, role **Viewer** unless it must write.
 - The `core` vault (admin secrets, homelab reference) has **no identity**: only the user's own account.
 - **One source per secret**: a secret lives in the vault of its consumer; do not keep copies in several vaults. If a copy
@@ -91,7 +92,7 @@ a project reads **all** of it. Hence:
   wildcard); **Universal Auth** only for machines without a platform identity (LXC, VM).
 - Access tokens short (TTL 1 h, max TTL 1 h), lockout kept on. Client secrets do not expire but are revocable and stored
   **only** on the machine that uses them (`0600`, owned by the service user), written there directly without display.
-- Names: a vault is named after its project; identity `<vault>-<purpose>` (for example `magpie-reader`,
+- Names: a zone vault in lowercase, one per zone or per service; a repository's vault after its project; identity `<vault>-<purpose>` (for example `magpie-reader`,
   `nextnode-ci-<repo>`).
 - Network replaces the paid IP allow-lists: the instance is reachable only through the tailnet, and the tailnet policy
   only lets the intended callers in (see the `tailscale` skill).
