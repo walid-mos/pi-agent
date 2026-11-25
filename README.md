@@ -18,6 +18,8 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
 - `skills/infisical`, `skills/tailscale`: our rules for secrets, vaults, identities and the tailnet policy. They read
   every homelab value from Infisical at run time (`~/.config/infisical/core.env`, `core:/homelab/reference`); none is
   written in this repo. The generic Infisical documentation comes from the vendored `infisical-ai-skills` package.
+  `skills/infisical/scripts/run.sh` gives any repository its environment from a vault folder, so no repository needs
+  a `.env`; `AGENTS.md` makes that the rule everywhere.
 - `skills/harness`: our rules for authoring skills (placement, description, body, scripts) and
   `scripts/check.sh`, the mechanical checks. `AGENTS.md` makes it mandatory for any skill change.
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
