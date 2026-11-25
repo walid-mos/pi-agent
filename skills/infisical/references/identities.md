@@ -25,6 +25,10 @@ Keep one line per identity. No secret values, no client IDs.
 
 Copies of a secret in more than one vault: none.
 
+Copies outside Infisical: `core:/homelab/magpie/MAGPIE_KEY_<machine>` sits in that Mac's login Keychain (item
+`pi-magpie`), because Pi cannot wait on the network for its key. After a rotation, run `pi-magpie-key
+MAGPIE_KEY_<machine>` on that Mac.
+
 ## Create a Universal Auth identity (API, user session)
 
 The CLI has no identity commands; use the API of the instance with the user's session token passed through a file
