@@ -29,3 +29,9 @@ one, stop and say so.
 - **Silenced errors**: catching an error and carrying on without logging it or failing (an empty `catch`, `|| true`,
   `2>/dev/null` on a command whose failure matters, an ignored return code). A caught error is either handled and
   logged with its cause, or it fails hard.
+
+## Secrets
+
+- Every secret of every repository, the user's own or a client's, lives in the user's Infisical and reaches a program
+  only at run time. Never create or fill a `.env` with a secret; read the `infisical` skill before any task that needs
+  a secret or an environment variable.
