@@ -12,6 +12,9 @@
 !/APPEND_SYSTEM.md
 !/extensions/
 !/skills/
+# Private skill repositories cloned inside skills/ (their own git repositories): never tracked here.
+/skills/accor/
+/skills/nextnode/
 !/prompts/
 !/themes/
 
