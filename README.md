@@ -25,6 +25,8 @@ repositories cloned there. This repository names none of them.
   `AGENTS.md` is the only place an exception is recorded.
 - `skills/harness`: our rules for authoring skills (placement, description, body, scripts) and
   `scripts/check.sh`, the mechanical checks. `AGENTS.md` makes it mandatory for any skill change.
+- `skills/chezmoi`: our rules for the dotfiles chezmoi manages: every change to one is saved with `dots -m`, as one
+  commit of the named files, pushed.
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
 
