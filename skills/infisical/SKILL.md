@@ -1,6 +1,6 @@
 ---
 name: infisical
-description: Operates the user's self-hosted Infisical - reading and copying secrets without ever exposing them, giving any repository (the user's or a client's) its secrets and environment variables without a `.env`, the vault (project) and machine identity model, homelab reference values, backups, restore tests and upgrades of the instance. Use whenever a task reads, writes, moves or rotates a secret, needs a secret, an API key, a token or an environment variable to run, test or deploy code, meets or is about to create a `.env` file, creates a project or a machine identity, gives a machine access to secrets, or maintains the Infisical server. Takes precedence over the generic infisical-* skills, which remain the reference for general documentation.
+description: Operates the user's self-hosted Infisical - reading and copying secrets without ever exposing them, giving any repository (the user's or a client's) its secrets and environment variables from outside it, without a `.env` and without any trace of Infisical in the repository, the vault (project) and machine identity model, homelab reference values, backups, restore tests and upgrades of the instance. Use whenever a task reads, writes, moves or rotates a secret, needs a secret, an API key, a token or an environment variable to run, test or deploy code, meets or is about to create a `.env` file, is about to add anything about Infisical to a repository, creates a project or a machine identity, gives a machine access to secrets, or maintains the Infisical server. Takes precedence over the generic infisical-* skills, which remain the reference for general documentation.
 ---
 
 # Infisical (self-hosted)
@@ -33,7 +33,8 @@ deployment, roles), read the vendored official skills `infisical-setup`, `infisi
 ## Secrets of a repository
 
 Every repository the user works in, their own or a client's, takes its secrets from Infisical, so that no secret value
-is ever written in a working tree.
+is ever written in a working tree. Infisical stays outside the repository: it is the user's private tooling, and the
+repository must work the same for anyone who does not have it.
 
 - Do not create or fill a `.env`, or any other file of the working tree, with a secret. If a `.env` already holds
   values, leave it unread and tell the user, who decides whether it moves to the vault.
@@ -41,8 +42,9 @@ is ever written in a working tree.
   zone (`references/identities.md`). It holds every variable a development machine needs to run the repository, plain
   settings included, so that one command gives a complete environment. What a deployed service reads lives in that
   service's own vault, not here.
-- The vault and the folder are named by the repository's domain skill or its `AGENTS.md`. If neither names them, ask
-  the user: a guess from a directory name can read another zone's vault.
+- The vault and the folder are named by the repository's domain skill, or by its `AGENTS.md` when it declares an
+  exception (below). If neither names them, ask the user, because a guess from a directory name can read another
+  zone's vault; offer to record the answer in a domain skill, not in the repository.
 - Run whatever needs the environment through `scripts/run.sh` (run it; it needs `bash`, `infisical` and `jq`):
 
   ```sh
@@ -54,19 +56,25 @@ is ever written in a working tree.
 - When code starts reading a new variable, add it to the folder in the same change (for its value, see "Receiving a
   value from the user").
 
-### A repository shared with people who do not use Infisical
+### Nothing of Infisical in the repository
 
-In a client's or a team's repository, Infisical is the user's private tooling. The others keep their `.env`, and
-nothing committed or pushed may show that Infisical exists or change how they get their environment.
+In every repository, the user's own included, nothing committed or pushed may show that Infisical exists or change
+how others get their environment. Only the exception below lifts this.
 
 - Nothing of Infisical enters the repository: no `.infisical.json` (even ignored), no `infisical` in a script, a
   `package.json`, a Makefile, a compose file, a CI workflow, a README or a doc, no dependency, no `.gitignore` line,
   and no mention in a commit message, a branch name, a pull request or a ticket.
-- The team's mechanism stays as it is and its rules still apply (a new variable is documented in their
+- The repository's own mechanism stays as it is and its rules still apply (a new variable is documented in its
   `.env.example` when the repository asks for it). Wrap the repository's own commands with `scripts/run.sh` from
   outside instead of changing them.
 - If a command takes its environment only from a file and ignores the process environment, stop and ask the user
   rather than writing that file.
+
+Exception: a repository integrates Infisical only when the user decides it. The decision is read in that repository's
+`AGENTS.md`, which says what may enter (a config file, scripts, CI, docs); only that enters, and the rest of this
+section still holds. When the user asks for an integration in the conversation and the `AGENTS.md` does not record it
+yet, propose the lines for it, so the next session knows. A `.infisical.json` or an `infisical` call already in the
+repository is not a decision: without the `AGENTS.md` lines, ask.
 
 ## Vaults and identities
 
