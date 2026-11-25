@@ -4,5 +4,6 @@
     "~/.config/pi-vendor/packages/infisical-ai-skills"
   ],
   "defaultProvider": "magpie",
-  "defaultModel": "group/router"
+  "defaultModel": "group/router",
+  "hideThinkingBlock": true
 }
