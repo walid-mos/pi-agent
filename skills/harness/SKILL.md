@@ -26,7 +26,7 @@ in the skill. If there is neither, there is nothing to encode: tell the user and
 | applies to every task in every repository | `~/.pi/agent/AGENTS.md`, in a line or two |
 | applies to one repository | that repository's `AGENTS.md` |
 | matters only for one kind of task | a skill: ours in `~/.pi/agent/skills/<name>/`, a project's in that project |
-| is third-party product documentation | a vendored package in `~/.config/pi-vendor`, which we never edit |
+| is third-party product documentation | a vendored package in `~/.config/pi/pi-vendor`, which we never edit |
 
 Our rules about a vendored skill's product go in a skill of ours whose description says it takes precedence (as
 `infisical` does). Extend an existing skill before creating a new one; a new skill needs a kind of task no existing

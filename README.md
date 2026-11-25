@@ -10,7 +10,7 @@ User-level configuration for [Pi](https://github.com/earendil-works/pi), checked
 - `AGENTS.md`: global instructions applied in every directory.
 - `extensions/`, `skills/`, `prompts/`, `themes/`: user resources, when present.
 
-Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.config/pi-vendor`, and declared in `settings.json` as local packages.
+Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.config/pi/pi-vendor`, and declared in `settings.json` as local packages.
 
 - `models.json.tmpl`: the `magpie` provider (the Magpie gateway's routing groups). chezmoi renders it into
   `models.json` with the machine's gateway address; the rendered file is never tracked. The key lives in `auth.json`
@@ -27,7 +27,7 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
 
 ```sh
 git clone git@github.com:walid-mos/pi-agent.git ~/.pi/agent   # before installing Pi, or merge into the existing dir
-git clone git@github.com:walid-mos/pi-vendor.git ~/.config/pi-vendor
+git clone git@github.com:walid-mos/pi-vendor.git ~/.config/pi/pi-vendor
 ```
 
 Then log in to providers again (for example `/login magpie`), since `auth.json` is not tracked.
