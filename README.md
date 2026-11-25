@@ -19,6 +19,7 @@ Third-party packages are vendored in the `pi-vendor` repo, checked out at `~/.co
   every homelab value from Infisical at run time (`~/.config/infisical/core.env`, `core:/homelab/reference`); none is
   written in this repo. The generic Infisical documentation comes from the vendored `infisical-ai-skills` package.
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
+- `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
 
 ## New machine
 
