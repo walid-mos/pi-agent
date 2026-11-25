@@ -20,7 +20,7 @@ repositories cloned there. This repository names none of them.
 - `skills/infisical`, `skills/tailscale`: our rules for secrets, vaults, identities and the tailnet policy. They read
   every homelab value from Infisical at run time (`~/.config/infisical/core.env`, `core:/homelab/reference`); none is
   written in this repo. The generic Infisical documentation comes from the vendored `infisical-ai-skills` package.
-  `skills/infisical/scripts/run.sh` gives any repository its environment from a vault folder, so no repository needs
+  `skills/infisical/scripts/run.sh` gives any repository its environment from its own vault, so no repository needs
   a `.env` and none shows a trace of Infisical; `AGENTS.md` makes that the rule everywhere, and a repository's own
   `AGENTS.md` is the only place an exception is recorded.
 - `skills/harness`: our rules for authoring skills (placement, description, body, scripts) and

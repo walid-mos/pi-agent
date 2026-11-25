@@ -38,22 +38,22 @@ repository must work the same for anyone who does not have it.
 
 - Do not create or fill a `.env`, or any other file of the working tree, with a secret. If a `.env` already holds
   values, leave it unread and tell the user, who decides whether it moves to the vault.
-- The local environment of a repository is one folder: `/projects/<repository name>` in the vault of the repository's
-  zone (`references/identities.md`). It holds every variable a development machine needs to run the repository, plain
-  settings included, so that one command gives a complete environment. What a deployed service reads lives in that
-  service's own vault, not here.
-- The vault and the folder are named by the repository's domain skill, or by its `AGENTS.md` when it declares an
-  exception (below). If neither names them, ask the user, because a guess from a directory name can read another
-  zone's vault; offer to record the answer in a domain skill, not in the repository.
+- A repository has its own vault: one vault per project, with the environments `dev` and `prod` and every secret at
+  the root, in no folder. The environment holds every variable a development machine needs to run the repository,
+  plain settings included, so that one command gives a complete environment.
+- The vault is named by the repository's domain skill, or by its `AGENTS.md` when it declares an exception (below).
+  If neither names it, ask the user, because a guess from a directory name can read another project's vault; offer
+  to record the answer in a domain skill, not in the repository.
 - Run whatever needs the environment through `scripts/run.sh` (run it; it needs `bash`, `infisical` and `jq`):
 
   ```sh
-  bash <this skill's directory>/scripts/run.sh <vault> /projects/<repository> -- <command>
+  bash <this skill's directory>/scripts/run.sh "<vault>" dev / -- <command>
   ```
 
-  It uses the user's CLI session and does not run the command when the folder is missing or holds no secret. Then
-  report it and have the folder filled; do not fall back to a file.
-- When code starts reading a new variable, add it to the folder in the same change (for its value, see "Receiving a
+  It finds the vault by its name, uses the user's CLI session and does not run the command when the vault, the
+  environment or the folder is missing or holds no secret. Then report it and have the vault filled; do not fall
+  back to a file.
+- When code starts reading a new variable, add it to the vault in the same change (for its value, see "Receiving a
   value from the user").
 
 ### Nothing of Infisical in the repository
@@ -81,7 +81,8 @@ repository is not a decision: without the `AGENTS.md` lines, ask.
 Free self-hosted Infisical has only built-in project roles (Admin, Member, Viewer, No Access): an identity with access to
 a project reads **all** of it. Hence:
 
-- **One vault (project) per trust zone**, and a vault boundary only counts if it matches a machine (or sandbox) boundary.
+- **One vault (project) per project** (a repository or a service), and a vault boundary only counts if it matches a
+  machine (or sandbox) boundary.
 - **One identity per workload**, with access to **exactly one vault**, role **Viewer** unless it must write.
 - The `core` vault (admin secrets, homelab reference) has **no identity**: only the user's own account.
 - **One source per secret**: a secret lives in the vault of its consumer; do not keep copies in several vaults. If a copy
@@ -90,7 +91,7 @@ a project reads **all** of it. Hence:
   wildcard); **Universal Auth** only for machines without a platform identity (LXC, VM).
 - Access tokens short (TTL 1 h, max TTL 1 h), lockout kept on. Client secrets do not expire but are revocable and stored
   **only** on the machine that uses them (`0600`, owned by the service user), written there directly without display.
-- Names: vault in lowercase, one per zone or per service; identity `<vault>-<purpose>` (for example `magpie-reader`,
+- Names: a vault is named after its project; identity `<vault>-<purpose>` (for example `magpie-reader`,
   `nextnode-ci-<repo>`).
 - Network replaces the paid IP allow-lists: the instance is reachable only through the tailnet, and the tailnet policy
   only lets the intended callers in (see the `tailscale` skill).
