@@ -15,8 +15,11 @@ declares that directory once as a local package, and its `package.json` picks up
 repositories cloned there. This repository names none of them.
 
 - `models.json.tmpl`: the `magpie` provider (the Magpie gateway's routing groups). chezmoi renders it into
-  `models.json` with the machine's gateway address; the rendered file is never tracked. The key lives in `auth.json`
-  as a command (`"key": "!infisical secrets get MAGPIE_KEY_<machine> ..."`), so it is never written to disk.
+  `models.json` with the machine's gateway address; the rendered file is never tracked. The key is in each Mac's login
+  Keychain, and `auth.json` reads it with a command (`"key": "!security find-generic-password -s pi-magpie -a api-key -w"`),
+  so it is never written to a file. `pi-magpie-key MAGPIE_KEY_<machine>` (from the dotfiles) copies it there from
+  Infisical and writes that line: run it on a new machine and after every rotation. Pi gives a key command 10 s and
+  caches a failure, so it must not depend on the network.
 - `skills/infisical`, `skills/tailscale`: our rules for secrets, vaults, identities and the tailnet policy. They read
   every homelab value from Infisical at run time (`~/.config/infisical/core.env`, `core:/homelab/reference`); none is
   written in this repo. The generic Infisical documentation comes from the vendored `infisical-ai-skills` package.
@@ -41,4 +44,4 @@ holds. Without the dotfiles:
 git clone git@github.com:walid-mos/pi-agent.git ~/.pi/agent   # before installing Pi, or merge into the existing dir
 ```
 
-Then log in to providers again (for example `/login magpie`), since `auth.json` is not tracked.
+Then run `pi-magpie-key MAGPIE_KEY_<machine>` in a terminal of the GUI session, since `auth.json` is not tracked.
