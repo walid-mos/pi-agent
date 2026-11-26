@@ -16,13 +16,14 @@ export type Result = { content?: { type: string; text?: string }[] } | undefined
 const EXPANDED_LINES = 20;
 
 /** The argument a call is about, in this order of preference. */
-const MAIN_ARGUMENTS = ["url", "target", "selector", "path", "tool"];
+const MAIN_ARGUMENTS = ["url", "target", "selector", "path", "key", "tool"];
 
-/** chrome's lists, by tool: the line that starts each item, and the item's name in the singular and the plural. */
+/** chrome's lists, by the tool that returns one: the line that starts each item, and the item's name in the singular and the plural. */
 const LISTS: Record<string, { item: RegExp; one: string; many: string }> = {
 	list_console_messages: { item: /^msgid=/, one: "console message", many: "console messages" },
 	list_network_requests: { item: /^reqid=/, one: "network request", many: "network requests" },
 	list_pages: { item: /^\d+: /, one: "page", many: "pages" },
+	select_page: { item: /^\d+: /, one: "page", many: "pages" },
 };
 
 export function formatCall(toolName: string, args: unknown, theme: Theme): string {
@@ -46,18 +47,18 @@ export function formatResult(toolName: string, result: Result, expanded: boolean
 		.join("\n");
 	if (isError) return theme.fg("error", expanded ? text : firstLine(text));
 	const images = content.filter((c) => c.type === "image").length;
-	const imageNote = images > 0 ? theme.fg("muted", `· ${images} ${images === 1 ? "image" : "images"}`) : undefined;
+	const imageNote = images > 0 ? `${images} ${images === 1 ? "image" : "images"}` : undefined;
 	if (expanded) {
 		const lines = text.split("\n");
-		const shown = [theme.fg("toolOutput", lines.slice(0, EXPANDED_LINES).join("\n"))];
+		const shown = imageNote ? [theme.fg("muted", imageNote)] : [];
+		shown.push(theme.fg("toolOutput", lines.slice(0, EXPANDED_LINES).join("\n")));
 		if (lines.length > EXPANDED_LINES) shown.push(theme.fg("muted", `… ${lines.length - EXPANDED_LINES} more lines`));
-		if (imageNote) shown.push(imageNote);
 		return shown.join("\n");
 	}
 	const { server, tool } = split(toolName);
 	const list = server === "chrome" ? LISTS[tool] : undefined;
 	const line = theme.fg("muted", list ? counted(text, list) : firstLine(text));
-	return imageNote ? `${line} ${imageNote}` : line;
+	return imageNote ? `${theme.fg("muted", `${imageNote} ·`)} ${line}` : line;
 }
 
 /** `mcp__<server>__<tool>`; a name of another shape is its own tool. */

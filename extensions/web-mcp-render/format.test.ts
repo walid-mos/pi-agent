@@ -27,6 +27,10 @@ test("an e2e tap shows its target node", () => {
 	assert.equal(formatCall("mcp__e2e__call", { tool: "tap", args: { target: "n12006" } }, theme), "<toolTitle>**e2e tap**</toolTitle> <accent>n12006</accent>");
 });
 
+test("an e2e press shows its key", () => {
+	assert.equal(formatCall("mcp__e2e__call", { tool: "press", args: { key: "Escape" } }, theme), "<toolTitle>**e2e press**</toolTitle> <accent>Escape</accent>");
+});
+
 test("a chrome call on a page shows the page id in muted", () => {
 	assert.equal(formatCall("mcp__chrome__select_page", { pageId: 3 }, theme), "<toolTitle>**chrome select_page**</toolTitle> <muted>page 3</muted>");
 });
@@ -59,6 +63,11 @@ test("a collapsed chrome page list counts its pages", () => {
 	assert.equal(formatResult("mcp__chrome__list_pages", result, false, false, theme), "<muted>2 pages</muted>");
 });
 
+test("a collapsed chrome select_page result counts the pages it lists", () => {
+	const result = { content: [text("## Pages\n1: Astore (http://localhost:5175/backoffice) [selected] isolatedContext=isolated-context-1\n2: about:blank")] };
+	assert.equal(formatResult("mcp__chrome__select_page", result, false, false, theme), "<muted>2 pages</muted>");
+});
+
 test("another collapsed result is its first line that is not a heading", () => {
 	const result = { content: [text("Navigated to https://example.com.\nTest line: await app.open(\"https://example.com\");")] };
 	assert.equal(formatResult("mcp__e2e__call", result, false, false, theme), "<muted>Navigated to https://example.com.</muted>");
@@ -66,10 +75,10 @@ test("another collapsed result is its first line that is not a heading", () => {
 	assert.equal(formatResult("mcp__chrome__performance_stop_trace", trace, false, false, theme), "<muted>URL: https://example.com/</muted>");
 });
 
-test("a result with an image says so in muted", () => {
+test("a result with an image says so in muted, first, so that cutting a long line keeps it", () => {
 	const result = { content: [text("Screenshot attached: 768 by 432 pixels."), { type: "image", data: "AAAA", mimeType: "image/png" }] };
-	assert.equal(formatResult("mcp__e2e__call", result, false, false, theme), "<muted>Screenshot attached: 768 by 432 pixels.</muted> <muted>· 1 image</muted>");
-	assert.match(formatResult("mcp__e2e__call", result, true, false, theme), /<muted>· 1 image<\/muted>$/);
+	assert.equal(formatResult("mcp__e2e__call", result, false, false, theme), "<muted>1 image ·</muted> <muted>Screenshot attached: 768 by 432 pixels.</muted>");
+	assert.match(formatResult("mcp__e2e__call", result, true, false, theme), /^<muted>1 image<\/muted>\n<toolOutput>Screenshot/);
 });
 
 test("an error result uses the error role, collapsed and expanded", () => {
