@@ -4,6 +4,6 @@
     "~/.config/pi"
   ],
   "defaultProvider": "magpie",
-  "defaultModel": "group/router-v2",
+  "defaultModel": "group/router",
   "hideThinkingBlock": true
 }
