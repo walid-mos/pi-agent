@@ -1,11 +1,10 @@
 // make-session.mjs <out.jsonl> <project-cwd> : writes a fake Pi session that exercises the main transcript elements
-// (user text, thinking, markdown with a table and code, read/bash/edit/write calls, a failing call). Edit diffs come
-// from Pi's own exported helpers, so the edit renderer receives the details a real edit produces. Its messages name
-// the default model of ~/.pi/agent/settings.json, so Pi restores it without a warning, as in a real session.
+// (user text, thinking, markdown with a table and code, read/bash/edit/write calls, a failing call). It is built with
+// Pi's own SessionManager and edit-diff helpers, so it has the current session format and the details a real edit
+// produces. Its messages name Pi's default model, so Pi restores it without a warning, as in a real session.
 import { readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { randomUUID } from "node:crypto";
 
 const [outPath, cwd] = process.argv.slice(2);
 if (!outPath || !cwd) {
@@ -23,51 +22,34 @@ try {
 	console.error(`make-session: no managed Pi install in ${install} (${error.message}); install Pi or fix the path.`);
 	process.exit(1);
 }
-const { generateDiffString, generateUnifiedPatch } = await import(pkg);
+const { SessionManager, SettingsManager, getAgentDir, generateDiffString, generateUnifiedPatch } = await import(pkg);
 
-const settingsPath = join(homedir(), ".pi/agent/settings.json");
-let model;
-try {
-	const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
-	model = { provider: settings.defaultProvider, id: settings.defaultModel };
-} catch (error) {
-	console.error(`make-session: cannot read ${settingsPath} (${error.message}).`);
-	process.exit(1);
-}
+const settings = SettingsManager.create(cwd, getAgentDir());
+const model = { provider: settings.getDefaultProvider(), id: settings.getDefaultModel() };
 if (!model.provider || !model.id) {
-	console.error(`make-session: ${settingsPath} needs defaultProvider and defaultModel; choose them with /model in Pi.`);
+	console.error("make-session: Pi has no default model; choose one with /model in Pi.");
 	process.exit(1);
 }
 
-// A fixed start time, so every run writes the same session apart from its id.
-const start = Date.parse("2026-01-05T09:00:00.000Z");
-let clock = start;
-let parentId = null;
-let idCounter = 0;
-const entries = [];
+const session = SessionManager.inMemory(cwd);
+session.appendModelChange(model.provider, model.id);
 
-const nextId = () => (0x10000000 + ++idCounter).toString(16);
-const tick = (ms = 1500) => (clock += ms);
+// Message times are fixed, so every run shows the same durations.
+let clock = Date.parse("2026-01-05T09:00:00.000Z");
+const tick = (ms) => (clock += ms);
 
-function push(entry) {
-	const id = nextId();
-	entries.push({ ...entry, id, parentId, timestamp: new Date(clock).toISOString() });
-	parentId = id;
-	return id;
-}
-
-const usage = (input, output) => ({
-	input,
-	output,
+const usage = {
+	input: 1200,
+	output: 380,
 	cacheRead: 9000,
 	cacheWrite: 400,
-	totalTokens: input + output + 9400,
+	totalTokens: 10980,
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
-});
+};
 
 function user(text) {
 	tick(4000);
-	push({ type: "message", message: { role: "user", content: [{ type: "text", text }], timestamp: clock } });
+	session.appendMessage({ role: "user", content: [{ type: "text", text }], timestamp: clock });
 }
 
 let callCounter = 0;
@@ -76,37 +58,31 @@ function assistant(blocks, stopReason = "toolUse") {
 	const content = blocks.map((b) =>
 		b.toolCall ? { type: "toolCall", id: `call_${++callCounter}`, name: b.toolCall, arguments: b.args } : b,
 	);
-	push({
-		type: "message",
-		message: {
-			role: "assistant",
-			content,
-			api: "openai-completions",
-			provider: model.provider,
-			model: model.id,
-			usage: usage(1200, 380),
-			stopReason,
-			thinkingLevel: "high",
-			durationMs: 2400,
-			timestamp: clock,
-		},
+	session.appendMessage({
+		role: "assistant",
+		content,
+		api: "openai-completions",
+		provider: model.provider,
+		model: model.id,
+		usage,
+		stopReason,
+		thinkingLevel: "high",
+		durationMs: 2400,
+		timestamp: clock,
 	});
 	return content.filter((b) => b.type === "toolCall");
 }
 
 function result(call, text, { isError = false, details } = {}) {
 	tick(700);
-	push({
-		type: "message",
-		message: {
-			role: "toolResult",
-			toolCallId: call.id,
-			toolName: call.name,
-			content: [{ type: "text", text }],
-			...(details ? { details } : {}),
-			isError,
-			timestamp: clock,
-		},
+	session.appendMessage({
+		role: "toolResult",
+		toolCallId: call.id,
+		toolName: call.name,
+		content: [{ type: "text", text }],
+		...(details ? { details } : {}),
+		isError,
+		timestamp: clock,
 	});
 }
 
@@ -114,16 +90,6 @@ function editDetails(path, before, after) {
 	const { diff, firstChangedLine } = generateDiffString(before, after);
 	return { diff, patch: generateUnifiedPatch(path, before, after), firstChangedLine };
 }
-
-// --- Session header and model ---
-entries.push({
-	type: "session",
-	version: 3,
-	id: randomUUID(),
-	timestamp: new Date(start).toISOString(),
-	cwd,
-});
-push({ type: "model_change", provider: model.provider, modelId: model.id });
 
 // --- Conversation ---
 const signupBefore = `import { createUser } from "./db";
@@ -308,4 +274,4 @@ All 7 tests pass.`,
 	"stop",
 );
 
-writeFileSync(outPath, entries.map((e) => JSON.stringify(e)).join("\n") + "\n");
+writeFileSync(outPath, [session.getHeader(), ...session.getEntries()].map((e) => JSON.stringify(e)).join("\n") + "\n");
