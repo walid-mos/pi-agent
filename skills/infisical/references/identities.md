@@ -25,6 +25,12 @@ Keep one line per identity. No secret values, no client IDs.
 
 Copies of a secret in more than one vault: none.
 
+Accounts outside Infisical opened with secrets from here: the agent's Bitwarden account, from `core:/tools/bitwarden`
+(environment `main`: `BW_CLIENTID`, `BW_CLIENTSECRET`, `BW_PASSWORD`). It is a member of the user's Bitwarden
+organization with edit rights on one collection, the agent's: it reads, creates, edits and deletes the items there,
+and nothing else. Its organization and collection names are read with `bw list organizations` and
+`bw list collections`.
+
 Copies outside Infisical: `core:/homelab/magpie/MAGPIE_KEY_<machine>` sits in that Mac's login Keychain (item
 `pi-magpie`), because Pi cannot wait on the network for its key. After a rotation, run `pi-magpie-key
 MAGPIE_KEY_<machine>` on that Mac.

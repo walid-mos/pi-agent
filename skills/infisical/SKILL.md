@@ -94,6 +94,9 @@ a project reads **all** of it. Hence:
   **only** on the machine that uses them (`0600`, owned by the service user), written there directly without display.
 - Names: a zone vault in lowercase, one per zone or per service; a repository's vault after its project; identity `<vault>-<purpose>` (for example `magpie-reader`,
   `nextnode-ci-<repo>`).
+- **Website logins are not kept here**: they live in Bitwarden, and an agent uses only its own Bitwarden collection,
+  as the `web` skill says. The credentials that open the agent's Bitwarden account are machine secrets and live here
+  (`references/identities.md`).
 - Network replaces the paid IP allow-lists: the instance is reachable only through the tailnet, and the tailnet policy
   only lets the intended callers in (see the `tailscale` skill).
 
