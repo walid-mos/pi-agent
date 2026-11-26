@@ -33,7 +33,8 @@
 ## Harmful events
 
 Never produce any of these, in any repository, whatever the size or urgency of the change. If a task seems to require
-one, stop and say so.
+one, stop and say so. Removing one is never a question for the user, even when it changes a design: do it, test
+first, and report it.
 
 - **Tautological tests**: a test that cannot fail when the behaviour it names is broken. It asserts what a mock was
   told to return, recomputes the expected value with the implementation's own logic, or only checks that code ran.
