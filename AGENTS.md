@@ -10,6 +10,16 @@
 - Before creating, editing, renaming or deleting any skill, in any skills directory, read the `harness` skill and
   follow it, even for a one-line change.
 
+## Code and documentation
+
+- The code is the context: to learn what exists, how something works or what a value is, read the code (with its
+  configuration and what its commands print), because it is what actually runs. Documentation (a README, an
+  `AGENTS.md` or `CLAUDE.md`, a skill, a comment) holds what the code cannot say: intent, decisions and their
+  reasons, constraints, traps, and the file or command to start from.
+- Where documentation describes the code and disagrees with it, the code is right: fix or delete the documentation in
+  the same change if you are changing either, otherwise tell the user. Where documentation states a rule or an
+  intended behaviour that the code breaks, the code is wrong: say so and keep the rule.
+
 ## Git workflow
 
 - Commit atomically: each commit is a small, self-contained change that builds, passes the tests and breaks
@@ -39,6 +49,14 @@ one, stop and say so.
 - **Silenced errors**: catching an error and carrying on without logging it or failing (an empty `catch`, `|| true`,
   `2>/dev/null` on a command whose failure matters, an ignored return code). A caught error is either handled and
   logged with its cause, or it fails hard.
+- **Documentation that goes stale**: writing in documentation something that turns false when the code changes or
+  time passes, with no error or check to reveal it: a fact the code holds (a file tree, a list of every file,
+  function, option or section, a count, a version, a default value, copied code or output), a link or path pinned to
+  a version, a commit, a line or a heading, a restatement of another document's contents, or what only held when it
+  was written (`currently`, `new`, the story of the change). Name the file or command that holds such a fact when the
+  reader would not find it otherwise, else write nothing: a vaguer sentence is not a fix. A path, a name, or a command
+  with the options a task needs is a pointer, not a copy, since following it fails once it is wrong: keep it exact. A
+  copy is written only when the user asks for one.
 
 ## Secrets
 
