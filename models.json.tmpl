@@ -8,7 +8,8 @@
       "compat": {
         "supportsReasoningEffort": true,
         "thinkingFormat": "openai",
-        "maxTokensField": "max_tokens"
+        "maxTokensField": "max_tokens",
+        "sendSessionAffinityHeaders": true
       },
       "models": [
         {
@@ -154,6 +155,26 @@
         {
           "id": "group/router",
           "name": "Magpie router",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 384000
+        },
+        {
+          "id": "group/router-v2",
+          "name": "Magpie router v2",
           "reasoning": true,
           "thinkingLevelMap": {
             "off": null,
