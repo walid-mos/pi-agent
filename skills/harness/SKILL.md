@@ -67,8 +67,8 @@ description covers.
 - Tie every condition to something observable (`if the file is missing, stop and ask`). "Unless it matters" is not a
   condition.
 - One term per concept, the same one throughout.
-- Nothing that rots: no dates, versions, "currently", or story of the session that produced the rule. Point to the
-  source of truth (`<tool> --help`, a manual, a file) instead of copying it, as `herdr` does.
+- Nothing that goes stale, as the global `AGENTS.md` defines it: point to the source of truth (`<tool> --help`, a
+  manual, a file) instead of copying it, as `herdr` does.
 - No private or machine-specific value (address, ID, hostname, account, token): this repository is shared between
   machines. Such values are read at run time, see the `infisical` skill.
 - Everything is in English.
@@ -95,5 +95,4 @@ start any reference longer than 100 lines with a `## Contents` list.
 - [ ] Reread the whole skill as an agent that has nothing else. Delete every line that agent would not miss.
 - [ ] Renaming or deleting a skill: search the other skills, the `AGENTS.md` files and `README.md` for its name and fix
       every mention in the same change.
-- [ ] A skill created, renamed or removed in `~/.pi/agent`: update the Contents list of `README.md` there.
 - [ ] Give the user the diff.
