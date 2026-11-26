@@ -1,6 +1,6 @@
 ---
 name: harness
-description: Our rules for authoring agent skills in this Pi harness - whether a rule belongs in a skill at all, where it goes, how a skill is named and its description routes, what a body may contain, how bundled scripts behave and how a skill is checked. Use before creating, editing, renaming, splitting, merging, reviewing or deleting any skill - a SKILL.md, its name or description, or any script, reference or asset in a skill directory - whether the skill is ours, a project's or vendored, even for a one-line change.
+description: Our rules for authoring agent skills, for Pi and Claude Code alike - whether a rule belongs in a skill at all, where it goes, how a skill is named and its description routes, what a body may contain, how bundled scripts behave and how a skill is checked. Use before creating, editing, renaming, splitting, merging, reviewing or deleting any skill - a SKILL.md, its name or description, or any script, reference or asset in a skill directory - whether the skill is ours, a project's, vendored or loaded by Claude Code only (`~/.claude/skills`, a project's `.claude/skills`), even for a one-line change.
 ---
 
 # Harness: authoring skills
