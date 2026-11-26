@@ -35,6 +35,9 @@ Never use one for another's job: a browser to read an article or an X post costs
 - With more than one session open, pass `session` to every `call`, `tools` and `close_session` (otherwise
   `SESSION_REQUIRED`).
 - Close each session when done: a page left open on a site keeps the shared Chromium running.
+- `SESSION_OPEN` means every session slot is taken. Each Pi session runs its own e2e server, so the open sessions are
+  all yours: close one you are done with. The limit is e2e's `--max-sessions` (its default is in
+  `~/.config/pi/pi-vendor/packages/e2e/skills/e2e/references/mcp.md`); raising it changes `mcp.json`, so ask the user.
 - Each session has its own cookies, storage, logins and tabs, so several sessions, in one agent or in several at once,
   do not disturb each other.
 - Screenshots: the result carries the image itself, so look at it there. To keep a file, pass `screenshot {path}` a
