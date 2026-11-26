@@ -1,0 +1,63 @@
+{
+  "mcpServers": {
+    "e2e": {
+      "command": "~/.config/pi/pi-vendor/packages/web-tools/node_modules/.bin/e2e",
+      "args": [
+        "mcp",
+        "--config",
+        "~/.local/state/e2e/e2e.config.ts",
+        "--target",
+        "chromium"
+      ],
+      "cwd": "~/.local/state/e2e",
+      "env": {
+        "E2E_TELEMETRY_DISABLED": "1"
+      },
+      "timeout": 120,
+      "exposure": "deferred",
+      "description": "Drives a real browser: navigate, click, fill, log in, screenshot, record video, cross-browser QA, write tests. Chromium is the main target; firefox and webkit are for cross-browser passes. The only server that acts on web pages, and the only one that starts the browser. Read the skill web first."
+    },
+    "chrome": {
+      "command": "~/.local/bin/pi-chrome-mcp",
+      "args": [
+        "--no-usage-statistics",
+        "--no-performance-crux",
+        "--no-javascript-evaluation",
+        "--memoryDebugging"
+      ],
+      "cwd": "~/.local/state/chrome-mcp",
+      "exposure": "hidden",
+      "toolExposure": {
+        "list_pages": "deferred",
+        "select_page": "deferred",
+        "list_console_messages": "deferred",
+        "get_console_message": "deferred",
+        "list_network_requests": "deferred",
+        "get_network_request": "deferred",
+        "performance_start_trace": "deferred",
+        "performance_stop_trace": "deferred",
+        "performance_analyze_insight": "deferred",
+        "emulate": "deferred",
+        "lighthouse_audit": "deferred",
+        "take_heapsnapshot": "deferred",
+        "close_heapsnapshot": "deferred",
+        "compare_heapsnapshots": "deferred",
+        "analyze_heapsnapshot_contexts": "deferred",
+        "query_heapsnapshot_objects": "deferred",
+        "get_heapsnapshot_summary": "deferred",
+        "get_heapsnapshot_details": "deferred",
+        "get_heapsnapshot_class_nodes": "deferred",
+        "get_heapsnapshot_dominators": "deferred",
+        "get_heapsnapshot_duplicate_strings": "deferred",
+        "get_heapsnapshot_edges": "deferred",
+        "get_heapsnapshot_object_details": "deferred",
+        "get_heapsnapshot_retainers": "deferred",
+        "get_heapsnapshot_retaining_paths": "deferred"
+      },
+      "description": "Chrome DevTools on the page e2e is driving, in the same Chromium, without acting on it: console messages, network requests, performance traces and insights, Lighthouse, memory. It never starts the browser: open the page with e2e first. Read the skill web first.",
+      "env": {
+        "CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS": "1"
+      }
+    }
+  }
+}

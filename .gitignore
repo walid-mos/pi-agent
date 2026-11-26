@@ -19,7 +19,6 @@
 # track the template, never the rendered file.
 !/models.json.tmpl
 
-# mcp.json and models.json can hold API keys. Before tracking them, make sure
-# every secret is a $VAR or !command reference, then add them here:
-# !/mcp.json
-# !/models.json
+# mcp.json and models.json can hold API keys. mcp.json is tracked: any secret added to it must be a $VAR or
+# !command reference, never a value. models.json stays rendered and untracked.
+!/mcp.json

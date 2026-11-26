@@ -16,6 +16,14 @@ it with a key command, so it is never written to a file: `pi-magpie-key MAGPIE_K
 copies it from Infisical and writes that command, on a new machine and after every rotation. Pi caches a key command
 that fails or times out, so that command must not depend on the network.
 
+## Browser MCP servers
+
+`mcp.json` declares two servers on one shared Chromium: `e2e` acts on pages, `chrome` (chrome-devtools-mcp) only
+inspects them. Their config and pinned tooling are in `pi-vendor/packages/web-tools`; the browser owner `pi-chromium`,
+the launcher `pi-chrome-mcp` and the install script come from the dotfiles. `chrome` is `hidden` with an allowlist in
+`toolExposure`, so a tool added by an update stays unreachable until someone classifies it: after updating
+chrome-devtools-mcp, run `pi mcp list` and classify the new names. The skill `web` holds the rules for using them.
+
 ## New machine
 
 The dotfiles (chezmoi) clone this repository into `~/.pi/agent` and set up `~/.config/pi` with the repositories it
