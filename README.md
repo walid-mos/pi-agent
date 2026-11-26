@@ -18,7 +18,7 @@ that fails or times out, so that command must not depend on the network.
 
 ## Browser MCP servers
 
-`mcp.json` declares two servers on one shared Chromium: `e2e` acts on pages, `chrome` (chrome-devtools-mcp) only
+`mcp.json` puts its browser servers on one shared Chromium: `e2e` acts on pages, `chrome` (chrome-devtools-mcp) only
 inspects them. Their config and pinned tooling are in `pi-vendor/packages/web-tools`; the browser owner `pi-chromium`,
 the launcher `pi-chrome-mcp` and the install script come from the dotfiles. `chrome` is `hidden` with an allowlist in
 `toolExposure`, so a tool added by an update stays unreachable until someone classifies it: after updating
