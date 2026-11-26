@@ -38,6 +38,11 @@ repositories cloned there. This repository names none of them.
   `node --test extensions/claude-skills/`.
 - `extensions/chezmoi/`: adds a note to the result of an `edit` or `write` on a file chezmoi manages, so the agent
   saves it as `skills/chezmoi` says. Tests: `node --test extensions/chezmoi/`.
+- `extensions/footer/`: replaces Pi's footer with a powerline one coloured from the theme: repository, branch, git
+  state and last commit on the left; generation speed, the Magpie routing group and the model it routed the latest
+  request to (`x-magpie-model` header, also written as the message's `responseModel`), thinking level, context,
+  tokens and subscription quotas on the right. Gives the working loader a comet animation. `/footer` switches back to
+  Pi's footer. Tests: `node --test extensions/footer/`.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
 
 ## New machine
