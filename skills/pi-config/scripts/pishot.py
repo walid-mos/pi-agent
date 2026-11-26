@@ -29,7 +29,7 @@ import time
 from pathlib import Path
 
 import pyte
-from fontTools.ttLib import TTCollection, TTFont
+from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).resolve().parent
@@ -90,12 +90,18 @@ def xterm_rgb(rgb: tuple[int, int, int]) -> str:
 
 CSI_RE = re.compile(r"\x1b\[([\x30-\x3f]*)([\x20-\x2f]*)([\x40-\x7e])")
 CSI_PARTIAL_RE = re.compile(r"\x1b\[[\x30-\x3f]*[\x20-\x2f]*\Z")
+OSC_RE = re.compile(r"\x1b\](.*?)(\x07|\x1b\\)", re.S)
+STRING_RE = re.compile(r"\x1b[P_^X](.*?)\x1b\\", re.S)  # DCS, APC, PM and SOS payloads
 
 
 class FaintScreen(pyte.Screen):
-    def __init__(self, cols, rows, palette):
+    def __init__(self, cols, rows, palette, write_back):
         super().__init__(cols, rows)
         self.palette = palette
+        self.write_back = write_back
+
+    def write_process_input(self, data: str) -> None:
+        self.write_back(data)  # pyte's own answers: device attributes, cursor position
 
     def select_graphic_rendition(self, *attrs, private=False):
         if private:
@@ -150,16 +156,15 @@ def normalize_sgr(params: str) -> str:
 
 
 class Terminal:
-    def __init__(self, cols, rows, palette, appearance, cell_px, write_back, query_log):
-        self.cols, self.rows = cols, rows
-        self.palette = palette
+    """The filter in front of pyte, with the answers to the queries pyte does not know."""
+
+    def __init__(self, screen: FaintScreen, appearance: str, cell_px: tuple[int, int], query_log: list[str]):
+        self.screen = screen
+        self.stream = pyte.Stream(screen)
         self.appearance = appearance
         self.cell_px = cell_px
-        self.screen = FaintScreen(cols, rows, palette)
-        self.stream = pyte.Stream(self.screen)
-        self.pending = ""
-        self.write_back = write_back
         self.query_log = query_log
+        self.pending = ""
 
     def feed(self, text: str) -> None:
         buf = self.pending + text
@@ -202,20 +207,17 @@ class Terminal:
                 return m.end(), None
             return m.end(), m.group(0)
         if kind == "]":
-            ends = [(k, 1) for k in [s.find("\x07", j)] if k >= 0] + [
-                (k, 2) for k in [s.find("\x1b\\", j)] if k >= 0
-            ]
-            if not ends:
+            m = OSC_RE.match(s, j)
+            if not m:
                 return None, None
-            k, width = min(ends)
-            self._osc(s[j + 2 : k], s[k : k + width])
-            return k + width, None
+            self._osc(m.group(1), m.group(2))
+            return m.end(), None
         if kind in "P_^X":
-            k = s.find("\x1b\\", j)
-            if k < 0:
+            m = STRING_RE.match(s, j)
+            if not m:
                 return None, None
-            self.query_log.append(f"dropped string {kind}: {s[j + 2 : k][:80]!r}")
-            return k + 2, None
+            self.query_log.append(f"dropped string {kind}: {m.group(1)[:80]!r}")
+            return m.end(), None
         if kind in "()*+":
             if j + 2 >= len(s):
                 return None, None
@@ -224,97 +226,86 @@ class Terminal:
 
     def _osc(self, body: str, term: str) -> None:
         code, _, rest = body.partition(";")
-        p = self.palette
+        p = self.screen.palette
         if code in ("10", "11", "12") and rest == "?":
             rgb = {"10": p["fg"], "11": p["bg"], "12": p["cursor"]}[code]
-            self.write_back(f"\x1b]{code};{xterm_rgb(rgb)}{term}")
+            self.screen.write_back(f"\x1b]{code};{xterm_rgb(rgb)}{term}")
             self.query_log.append(f"answered OSC {code}")
         elif code == "4" and "?" in rest:
             fields = rest.split(";")
             for n, q in zip(fields[0::2], fields[1::2]):
                 if q == "?" and n.isdigit() and int(n) < 16:
-                    self.write_back(f"\x1b]4;{n};{xterm_rgb(p['ansi'][int(n)])}{term}")
+                    self.screen.write_back(f"\x1b]4;{n};{xterm_rgb(p['ansi'][int(n)])}{term}")
             self.query_log.append(f"answered OSC 4;{fields[0]}")
         elif rest.endswith("?") or body.endswith("?"):
             self.query_log.append(f"unanswered OSC {body[:80]!r}")
 
     def _csi_query(self, params: str, inter: str, final: str) -> None:
         cw, ch = self.cell_px
+        rows, cols = self.screen.lines, self.screen.columns
         reply = None
-        if final == "c" and params in ("", "0") and not inter:
-            reply = "\x1b[?62;22c"  # VT220 with ANSI color: what Pi needs to stop waiting for other answers
-        elif final == "n" and params == "6":
-            reply = f"\x1b[{self.screen.cursor.y + 1};{self.screen.cursor.x + 1}R"
-        elif final == "n" and params == "?996":
+        if final == "n" and params == "?996":
             reply = "\x1b[?997;1n" if self.appearance == "dark" else "\x1b[?997;2n"
         elif final == "t" and params == "14":
-            reply = f"\x1b[4;{self.rows * ch};{self.cols * cw}t"
+            reply = f"\x1b[4;{rows * ch};{cols * cw}t"
         elif final == "t" and params == "16":
             reply = f"\x1b[6;{ch};{cw}t"
         elif final == "t" and params == "18":
-            reply = f"\x1b[8;{self.rows};{self.cols}t"
+            reply = f"\x1b[8;{rows};{cols}t"
         elif final == "p" and inter == "$" and params.startswith("?"):
             reply = f"\x1b[{params};0$y"  # mode not recognized
         elif final in "uq" and params[:1] in "?>":
             self.query_log.append(f"unanswered CSI {params}{inter}{final}")
         if reply:
-            self.write_back(reply)
+            self.screen.write_back(reply)
             self.query_log.append(f"answered CSI {params}{inter}{final}")
 
 
 # ---------------------------------------------------------------------------
 # Drawing
 
-FONT_DIRS = [Path.home() / "Library/Fonts", Path("/Library/Fonts"), Path("/System/Library/Fonts"),
-             Path("/System/Library/Fonts/Supplemental")]  # where macOS installs user and system fonts
 GLYPH_FALLBACKS = ["Menlo.ttc", "Apple Symbols.ttf", "Arial Unicode.ttf"]  # macOS fonts that cover what a terminal font lacks
 EMOJI_FONT = "Apple Color Emoji.ttc"
 EMOJI_PX = 160  # Apple Color Emoji only holds bitmaps at fixed sizes; 160 is one of them
 FAINT = 0.45  # how far faint text moves from its color toward the background, close to Ghostty's rendering
 PAD = 12  # margin around the screen in the PNG, in pixels
 
-NAMED = {"black": 0, "red": 1, "green": 2, "brown": 3, "yellow": 3, "blue": 4, "magenta": 5, "cyan": 6, "white": 7}
+NAMED = {"black": 0, "red": 1, "green": 2, "brown": 3, "blue": 4, "magenta": 5, "cyan": 6, "white": 7}
 
 
-def find_font(name: str) -> Path | None:
-    return next((d / name for d in FONT_DIRS if (d / name).exists()), None)
+def find_font(name: str, size: int) -> ImageFont.FreeTypeFont | None:
+    """A font by file name, with or without extension, searched by Pillow in the macOS font directories."""
+    try:
+        return ImageFont.truetype(name, size)
+    except OSError:  # not installed: the caller decides whether that matters
+        return None
 
 
-def font_file(stem: str) -> Path | None:
-    return find_font(f"{stem}.otf") or find_font(f"{stem}.ttf")
-
-
-def family_stem(family: str) -> str:
-    """File stem prefix of a family. A Nerd Font's `Mono` files keep every icon one cell wide, as a terminal draws them."""
-    base = family.replace(" ", "")
-    for stem in (f"{base}Mono", base):
-        if font_file(f"{stem}-Regular"):
-            return stem
-    fail(f"no font files for {family!r} in {', '.join(map(str, FONT_DIRS))}; pass --font with an installed family")
-
-
-def cmap_of(path: Path) -> set[int]:
-    font = TTCollection(str(path)).fonts[0] if path.suffix == ".ttc" else TTFont(str(path), lazy=True)
-    return set(font.getBestCmap() or {})
+def cmap_of(font: ImageFont.FreeTypeFont) -> set[int]:
+    return set(TTFont(font.path, fontNumber=0, lazy=True).getBestCmap() or {})
 
 
 class Glyphs:
     def __init__(self, family: str, size: int):
-        stem = family_stem(family)
+        # A Nerd Font's `Mono` files keep every icon one cell wide, as a terminal draws them.
+        base = family.replace(" ", "")
+        for stem in (f"{base}Mono", base):
+            regular = find_font(f"{stem}-Regular", size)
+            if regular:
+                break
+        else:
+            fail(f"no font files for {family!r}; pass --font with an installed family")
         self.styles = {}
         for key, style in {(False, False): "Regular", (True, False): "Bold",
                            (False, True): "Italic", (True, True): "BoldItalic"}.items():
-            path = font_file(f"{stem}-{style}")
-            if path is None:
+            font = find_font(f"{stem}-{style}", size)
+            if font is None:
                 print(f"pishot: no {stem}-{style} font file; {style} text is drawn with Regular", file=sys.stderr)
-                path = font_file(f"{stem}-Regular")
-            self.styles[key] = ImageFont.truetype(str(path), size)
-        self.cmap = cmap_of(font_file(f"{stem}-Regular"))
-        self.fallbacks = [(ImageFont.truetype(str(p), size), cmap_of(p))
-                          for p in (find_font(n) for n in GLYPH_FALLBACKS) if p]
-        emoji = find_font(EMOJI_FONT)
-        self.emoji = (ImageFont.truetype(str(emoji), EMOJI_PX), cmap_of(emoji)) if emoji else None
-        regular = self.styles[(False, False)]
+            self.styles[key] = font or regular
+        self.cmap = cmap_of(regular)
+        self.fallbacks = [(font, cmap_of(font)) for font in (find_font(n, size) for n in GLYPH_FALLBACKS) if font]
+        emoji = find_font(EMOJI_FONT, EMOJI_PX)
+        self.emoji = (emoji, cmap_of(emoji)) if emoji else None
         ascent, descent = regular.getmetrics()
         self.ascent = ascent
         self.cell_w = round(regular.getlength("M"))
@@ -483,14 +474,147 @@ def key_bytes(name: str) -> str:
     m = re.fullmatch(r"ctrl\+([a-z])", name)
     if m:
         return chr(ord(m.group(1)) - 96)
-    fail(f"unknown key {name!r}; use ctrl+<letter> or one of {', '.join(KEYS)}")
+    raise ValueError(f"unknown key {name!r}; use ctrl+<letter> or one of {', '.join(KEYS)}")
+
+
+def parse_step(text: str) -> tuple[str, object]:
+    """One --step, checked before Pi starts: ("input", chars), ("wait", seconds) or ("shot", path)."""
+    kind, _, value = text.partition(":")
+    try:
+        if kind == "key":
+            return "input", key_bytes(value)
+        if kind == "text":
+            return "input", value
+        if kind == "wait":
+            return "wait", float(value)
+        if kind == "shot":
+            return "shot", Path(value).resolve()
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
+    raise argparse.ArgumentTypeError(f"unknown step {text!r}; use key:, text:, wait: or shot:")
+
+
+def read_some(fd: int) -> bytes | None:
+    """What the program wrote within 50 ms: None if nothing, b"" once it has closed the terminal."""
+    if not select.select([fd], [], [], 0.05)[0]:
+        return None
+    try:
+        return os.read(fd, 65536)
+    except OSError:  # EIO: the program closed the terminal
+        return b""
+
+
+def reap(pid: int, fd: int, sig: int) -> bool:
+    """Sends `sig` and waits for Pi to exit, reading its output: Pi cannot exit while that output sits unread."""
+    try:
+        os.killpg(pid, sig)
+    except (ProcessLookupError, PermissionError):  # already exited; macOS answers EPERM for a zombie group
+        pass
+    deadline = time.monotonic() + 3.0  # Pi restores the terminal on exit in well under a second
+    while time.monotonic() < deadline:
+        if os.waitpid(pid, os.WNOHANG)[0]:
+            return True
+        read_some(fd)
+    return False
+
+
+def pi_argv(args: argparse.Namespace, work: Path) -> list[str]:
+    sessions = work / "sessions"
+    sessions.mkdir()
+    argv = ["pi", "--session-dir", str(sessions), "--offline"]
+    if args.blank:
+        return [*argv, "--no-session", *args.pi_args]
+    session = sessions / "session.jsonl"
+    if args.session:
+        try:
+            shutil.copy(args.session, session)
+        except OSError as error:
+            fail(f"cannot copy the session {args.session}: {error}")
+    else:
+        project = work / "project"
+        project.mkdir()
+        r = subprocess.run(["node", str(HERE / "make-session.mjs"), str(session), str(project)],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            fail(f"make-session.mjs failed:\n{r.stderr.strip()}")
+    return [*argv, "--session", str(session), *args.pi_args]
+
+
+def capture(argv: list[str], args: argparse.Namespace, palette: dict, appearance: str, glyphs: Glyphs) -> None:
+    # A clean terminal identity: inherited multiplexer variables would make Pi talk to the caller's terminal.
+    env = {k: v for k, v in os.environ.items()
+           if not k.startswith(("HC_", "GHOSTTY", "KITTY", "WEZTERM", "TMUX", "TERM_PROGRAM", "COLORFGBG"))}
+    env.update(TERM="xterm-256color", COLORTERM="truecolor")
+    winsize = struct.pack("HHHH", args.rows, args.cols, args.cols * glyphs.cell_w, args.rows * glyphs.cell_h)
+
+    pid, fd = pty.fork()
+    if pid == 0:
+        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCSWINSZ, winsize)  # before exec: Pi's first read sees it
+        os.execvpe(argv[0], argv, env)
+
+    raw = bytearray()
+    queries: list[str] = []
+    screen = FaintScreen(args.cols, args.rows, palette, lambda s: os.write(fd, s.encode()))
+    term = Terminal(screen, appearance, (glyphs.cell_w, glyphs.cell_h), queries)
+    decoder = codecs.getincrementaldecoder("utf-8")("replace")
+
+    def pump(seconds: float) -> bool:
+        """Feeds the screen until `settle` seconds pass without output, at most `seconds`. False once Pi exited."""
+        deadline = time.monotonic() + seconds
+        last = time.monotonic()
+        while time.monotonic() < deadline:
+            data = read_some(fd)
+            if data is None:
+                if time.monotonic() - last >= args.settle:
+                    break
+                continue
+            if not data:
+                return False
+            raw.extend(data)
+            term.feed(decoder.decode(data))
+            last = time.monotonic()
+        return True
+
+    def shot(path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        render(screen, palette, glyphs, path)
+        path.with_suffix(".txt").write_text("\n".join(line.rstrip() for line in screen.display) + "\n")
+        print(path)
+
+    alive = True
+    try:
+        alive = pump(args.timeout)
+        for kind, value in args.step:
+            if not alive:
+                break
+            if kind == "shot":
+                shot(value)
+            elif kind == "wait":
+                alive = pump(value)
+            else:
+                os.write(fd, value.encode())
+                alive = pump(args.timeout)
+        shot(args.out)
+    finally:
+        exited = any(reap(pid, fd, sig) for sig in (signal.SIGTERM, signal.SIGKILL))
+        os.close(fd)
+        if args.debug:
+            args.out.with_suffix(".ansi").write_bytes(bytes(raw))
+            args.out.with_suffix(".log").write_text("\n".join(queries) + "\n")
+        if not exited:
+            print(f"pishot: pi (pid {pid}) survived SIGKILL; kill it by hand", file=sys.stderr)
+    if glyphs.missing:
+        print(f"pishot: no font has these glyphs, drawn as boxes: {''.join(sorted(glyphs.missing))}", file=sys.stderr)
+    if not alive:
+        fail(f"pi exited before the last screenshot; its last screen is in {args.out.with_suffix('.txt')}")
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", required=True, help="final PNG")
-    ap.add_argument("--session", help="session JSONL to open, copied first (default: a fake session)")
-    ap.add_argument("--blank", action="store_true", help="no session: shows Pi's startup screen and diagnostics")
+    ap.add_argument("--out", required=True, type=lambda p: Path(p).resolve(), help="final PNG")
+    source = ap.add_mutually_exclusive_group()
+    source.add_argument("--session", help="session JSONL to open, copied first (default: a fake session)")
+    source.add_argument("--blank", action="store_true", help="no session: shows Pi's startup screen and diagnostics")
     # 110x50 is a common laptop terminal; vary --cols to check that renderers fit narrow and wide widths.
     ap.add_argument("--cols", type=int, default=110)
     ap.add_argument("--rows", type=int, default=50)
@@ -502,13 +626,11 @@ def main() -> None:
     # Pi redraws in bursts; one second of silence means a frame is complete.
     ap.add_argument("--settle", type=float, default=1.0, help="seconds without output that count as settled")
     ap.add_argument("--timeout", type=float, default=25.0, help="max seconds to wait for each settle")
-    ap.add_argument("--step", action="append", default=[],
+    ap.add_argument("--step", action="append", default=[], type=parse_step,
                     help="key:<name> | text:<chars> | wait:<seconds> | shot:<png>, run in order")
     ap.add_argument("--debug", action="store_true", help="also write the raw output (.ansi) and the queries (.log)")
     ap.add_argument("pi_args", nargs="*", help="arguments for pi, after --")
     args = ap.parse_args()
-    if args.blank and args.session:
-        fail("--blank and --session exclude each other")
 
     appearance = args.appearance or macos_appearance()
     settings = herdr_settings() if not (args.palette and args.font) else {}
@@ -518,125 +640,9 @@ def main() -> None:
                     args.font_size)
     if shutil.which("pi") is None:
         fail("pi is not on PATH")
-
-    out = Path(args.out).resolve()
-    out.parent.mkdir(parents=True, exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix="pishot-"))
-    sessions = work / "sessions"
-    sessions.mkdir()
-    argv = ["pi", "--session-dir", str(sessions), "--offline"]
-    if args.blank:
-        argv.append("--no-session")
-    else:
-        session = sessions / "session.jsonl"
-        if args.session:
-            shutil.copy(args.session, session)
-        else:
-            project = work / "project"
-            project.mkdir()
-            r = subprocess.run(["node", str(HERE / "make-session.mjs"), str(session), str(project)],
-                               capture_output=True, text=True)
-            if r.returncode != 0:
-                shutil.rmtree(work)
-                fail(f"make-session.mjs failed:\n{r.stderr.strip()}")
-        argv += ["--session", str(session)]
-    argv += args.pi_args
-
-    # A clean terminal identity: inherited multiplexer variables would make Pi talk to the caller's terminal.
-    env = {k: v for k, v in os.environ.items()
-           if not k.startswith(("HC_", "GHOSTTY", "KITTY", "WEZTERM", "TMUX", "TERM_PROGRAM", "COLORFGBG"))}
-    env.update(TERM="xterm-256color", COLORTERM="truecolor")
-    winsize = struct.pack("HHHH", args.rows, args.cols, args.cols * glyphs.cell_w, args.rows * glyphs.cell_h)
-
-    pid, fd = pty.fork()
-    if pid == 0:
-        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCSWINSZ, winsize)
-        os.execvpe(argv[0], argv, env)
-    fcntl.ioctl(fd, termios.TIOCSWINSZ, winsize)
-
-    raw = bytearray()
-    queries: list[str] = []
-    term = Terminal(args.cols, args.rows, palette, appearance, (glyphs.cell_w, glyphs.cell_h),
-                    lambda s: os.write(fd, s.encode()), queries)
-    decoder = codecs.getincrementaldecoder("utf-8")("replace")
-    alive = True
-    written: list[Path] = []
-
-    def pump(deadline: float) -> None:
-        nonlocal alive
-        last = time.monotonic()
-        while alive and time.monotonic() < deadline:
-            if select.select([fd], [], [], 0.05)[0]:
-                try:
-                    data = os.read(fd, 65536)
-                except OSError:  # EIO: the program closed the terminal, which the empty read below also means
-                    data = b""
-                if not data:
-                    alive = False
-                    break
-                raw.extend(data)
-                term.feed(decoder.decode(data))
-                last = time.monotonic()
-            elif time.monotonic() - last >= args.settle:
-                break
-
-    def shot(path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        render(term.screen, palette, glyphs, path)
-        path.with_suffix(".txt").write_text("\n".join(line.rstrip() for line in term.screen.display) + "\n")
-        written.append(path)
-        print(path)
-
-    try:
-        pump(time.monotonic() + args.timeout)
-        for step in args.step:
-            kind, _, value = step.partition(":")
-            if kind == "shot":
-                shot(Path(value).resolve())
-                continue
-            if kind == "wait":
-                pump(time.monotonic() + float(value))
-                continue
-            if kind == "key":
-                os.write(fd, key_bytes(value).encode())
-            elif kind == "text":
-                os.write(fd, value.encode())
-            else:
-                fail(f"unknown step {step!r}; use key:, text:, wait: or shot:")
-            pump(time.monotonic() + args.timeout)
-        shot(out)
-    finally:
-        # Pi cannot finish exiting while its last output sits unread in the terminal, so keep reading it.
-        exited = False
-        for sig in (signal.SIGTERM, signal.SIGKILL):
-            try:
-                os.killpg(pid, sig)
-            except (ProcessLookupError, PermissionError):  # already exited; macOS answers EPERM for a zombie group
-                pass
-            deadline = time.monotonic() + 3.0  # Pi saves and restores the terminal on exit in well under a second
-            while time.monotonic() < deadline:
-                if os.waitpid(pid, os.WNOHANG)[0]:
-                    exited = True
-                    break
-                if select.select([fd], [], [], 0.05)[0]:
-                    try:
-                        os.read(fd, 65536)
-                    except OSError:  # EIO once the program has closed the terminal
-                        pass
-            if exited:
-                break
-        os.close(fd)
-        if args.debug:
-            out.with_suffix(".ansi").write_bytes(bytes(raw))
-            out.with_suffix(".log").write_text("\n".join(queries) + "\n")
-        shutil.rmtree(work)
-        if not exited:
-            print(f"pishot: pi (pid {pid}) survived SIGKILL; kill it by hand", file=sys.stderr)
-    if glyphs.missing:
-        print(f"pishot: no font has these glyphs, drawn as boxes: {''.join(sorted(glyphs.missing))}", file=sys.stderr)
-    if not alive:
-        fail(f"pi exited before the last screenshot; its last screen is in {written[-1].with_suffix('.txt')}"
-             if written else "pi exited before any screenshot")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="pishot-") as work:
+        capture(pi_argv(args, Path(work)), args, palette, appearance, glyphs)
 
 
 if __name__ == "__main__":

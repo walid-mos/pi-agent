@@ -58,8 +58,7 @@ Read every PNG with your image-reading tool and, for each element you changed, c
 - `--appearance dark` and `light`, when colors changed;
 - collapsed and expanded (`key:ctrl+o`), success and failure, for a tool renderer.
 
-When `pishot.sh` exits non-zero, its message says why. A broken extension stops Pi at startup: the `.txt` then holds
-Pi's error.
+A broken extension stops Pi at startup: `pishot.sh` then exits non-zero and the `.txt` holds Pi's error.
 
 Then give the user the PNG paths with one line on what each shows.
 
