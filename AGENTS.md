@@ -62,9 +62,10 @@ first, and report it.
   is never the way to wait for anything: start whatever is slow in the background and let its event resume you (its
   exit, a line of its output, a report from the agent you started, a watcher on the file or the stream). While it
   runs, do every piece of work that does not depend on it: a review, a CI run or a test suite runs alongside the next
-  step and its findings are applied when they arrive, it does not hold the next step back. Block on an event only
-  when no independent work is left, and inspect what you are waiting for as soon as it is silent for longer than it
-  should be: from then on it is a blocker.
+  step and its findings are applied when they arrive, it does not hold the next step back. Sleeping and
+  then reading its output or its status again is polling, not work. When nothing independent is left to do, end your
+  turn: what you started in the background reports its end to you, and that report resumes you. Give whatever can
+  hang a time limit, so that being stuck is reported too instead of leaving you waiting for nothing.
 - **Silent blockers**: losing time on something that will not unblock by itself (a permission or trust prompt, an
   agent you started that sits at a prompt or never took its task, a missing access or secret, a delay imposed by a
   tool or a registry, a decision that is the user's) without the user knowing. As soon as you meet one, take the
