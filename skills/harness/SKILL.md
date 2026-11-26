@@ -9,8 +9,10 @@ A skill is a prompt loaded on demand. Its description sits in the system prompt 
 body competes with the task it is loaded for. So a skill holds only what an agent got wrong or could not find, in as
 few lines as possible.
 
-For the format itself (frontmatter fields, discovery locations, `/skill:name`, `/reload`), read Pi's `docs/skills.md`
-(its path is in the system prompt, under "Additional docs") rather than relying on memory.
+For the format itself (frontmatter fields, discovery locations, `/skill:name`, `/reload`), read `docs/skills.md` in
+Pi's manual,
+`~/.pi/agent/install/releases/$(cat ~/.pi/agent/install/current-version)/node_modules/@earendil-works/pi-coding-agent/docs/`,
+rather than relying on memory.
 
 ## 1. Know why the change exists
 
@@ -28,6 +30,10 @@ in the skill. If there is neither, there is nothing to encode: tell the user and
 | matters only for one kind of task | a skill: ours in `~/.pi/agent/skills/<name>/`, a project's in that project |
 | is private to one client or company (its names, repositories, colleagues, tools) | a skill in that domain's private repository, `~/.config/pi/pi-<domain>/skills/`, never in this public repository |
 | is third-party product documentation | a vendored package in `~/.config/pi/pi-vendor`, which we never edit |
+
+Every skill Pi loads from the user's directories is Claude Code's too: at each Pi start, the `claude-skills`
+extension links it into `~/.claude/skills`. So a skill is created, edited and removed where Pi loads it; one created
+in `~/.claude/skills` stays Claude Code's alone.
 
 Our rules about a vendored skill's product go in a skill of ours whose description says it takes precedence (as
 `infisical` does). Extend an existing skill before creating a new one; a new skill needs a kind of task no existing
@@ -50,6 +56,8 @@ description covers.
   exact commands. No general explanations, no tour of files the agent can list itself.
 - Match the freedom to the risk. Fragile or irreversible operations get exact commands, a checklist or a script.
   Judgement calls get the goal, the constraint and the reason.
+- Write for any agent: Pi and Claude Code both read the skill, so name a file by its path and a tool by what it
+  does, never by what only one of them shows (Pi's system prompt, Claude Code's tool names).
 - Give each rule its reason in a clause. A rule with a reason is applied to cases you did not foresee; a shouted rule
   is applied literally or not at all, so no capitals for emphasis.
 - Give one default way to do each thing. Add an alternative only with the observable condition that calls for it
