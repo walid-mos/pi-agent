@@ -76,8 +76,11 @@ first, and report it.
 
 ## Secrets
 
-- Every secret of every repository, the user's own or a client's, lives in the user's Infisical and reaches a program
-  only at run time. Never create or fill a `.env` with a secret; read the `infisical` skill before any task that needs
-  a secret or an environment variable.
+- Every machine secret (an API key, a token, a client secret, an environment variable) of every repository, the
+  user's own or a client's, lives in the user's Infisical and reaches a program only at run time. Never create or fill
+  a `.env` with a secret; read the `infisical` skill before any task that needs a secret or an environment variable.
+- Website logins (a username, a password, a one-time code typed into a web page) live in Bitwarden, not in Infisical.
+  An agent uses only the accounts of its own Bitwarden collection, as the `web` skill says, never the user's personal
+  logins. The credentials that open the agent's Bitwarden account are machine secrets and live in Infisical.
 - Infisical stays outside every repository: nothing of it is committed or pushed, unless that repository's
   `AGENTS.md` records the user's decision to integrate it.
