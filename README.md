@@ -33,6 +33,9 @@ repositories cloned there. This repository names none of them.
 - `skills/herdr`: points agents to the manuals built into Herdr (`hc --skill`, `herdr-app --skill`) and adds our rules.
 - `skills/pi-config`: where a theme, extension, renderer or setting goes, and `scripts/pishot.sh`, which screenshots
   Pi's terminal UI on a fake or real session, without a model call, to check a visual change.
+- `extensions/claude-skills/`: at each Pi start, links every skill Pi loads from the user's directories into
+  `~/.claude/skills`, so Claude Code has the same skills, read where Pi keeps them. Tests:
+  `node --test extensions/claude-skills/`.
 - `extensions/chezmoi/`: adds a note to the result of an `edit` or `write` on a file chezmoi manages, so the agent
   saves it as `skills/chezmoi` says. Tests: `node --test extensions/chezmoi/`.
 - `extensions/decide.ts`: the `decide` tool, which asks Jev (`group/decide` on Magpie) a closed question; auto-discovered, not declared in `settings.json`.
