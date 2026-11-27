@@ -30,14 +30,6 @@
 - Every commit message follows commitlint: the repository's commitlint config when it has one, otherwise the
   Conventional Commits format (`type(scope): subject`) of `@commitlint/config-conventional`.
 
-## Gates and machine load
-
-- A project's gates (its lint, typecheck, test and build commands) do not depend on each other: start them together,
-  never one after the other.
-- Mind the load you put on the machine: look at what already runs before starting several heavy processes, and start
-  no more than it can carry. When the machine slows down, swaps or kills a process for lack of memory, stop adding
-  work, tell the user and offer to investigate the cause, instead of retrying.
-
 ## Harmful events
 
 Never produce any of these, in any repository, whatever the size or urgency of the change. If a task seems to require

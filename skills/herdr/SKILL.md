@@ -1,6 +1,6 @@
 ---
 name: herdr
-description: Drives Herdr - the Herdr App window (spaces, tabs, panes) through herdr-app, and persistent terminals, programs and coding agents through herdr-core (hc), on this machine or another machine of the user. Use when starting, delegating to, watching, messaging or cleaning up agents or long-running programs in terminals, when changing what the user sees in the Herdr window, or when working across the user's machines with hc.
+description: Drives Herdr - the Herdr App window (spaces, tabs, panes) through herdr-app, and persistent terminals, programs and coding agents through herdr-core (hc), on this machine or another machine of the user. Use when starting, delegating to, watching, messaging or cleaning up agents or long-running programs in terminals, when running a project's gates (lint, typecheck, tests, build) or several programs at once, when changing what the user sees in the Herdr window, or when working across the user's machines with hc.
 ---
 
 # Herdr
@@ -32,4 +32,6 @@ If a command is missing or behaves differently from what you expect, read `hc <c
   except those the user wants to watch or keep: start those with `--outlive-parent` and, to show one, give it a tab
   (`herdr-app do terminal.keep --terminal <id> --place tab`, see `herdr-app --skill`).
 - Long or slow commands (builds, installs, deploys, tests) run in an hc terminal, not in your own shell.
+- Before starting several programs or agents at once (a project's gates, parallel agents, several servers), read
+  `references/parallel-load.md`: what starts together and how much the machine can carry.
 - Secrets follow the `infisical` skill: never type a secret into a terminal, a `send` or a task description.
