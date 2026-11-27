@@ -29,9 +29,6 @@ ships ready-made buttons, dialogs, tables or toasts.
 - A command that writes component source into the project is vendoring: run it with the project's package manager,
   then read every file it wrote and every dependency it added before committing. A dependency it added that is itself
   a component package is not kept: take that component's source instead.
-- When a source ships a component only as a package to import, copy that component's source from the source's
-  repository, if its licence allows it. If the component cannot be copied without installing the package, do not use
-  it, and tell the user which component and why.
 - When another skill tells you to install a component package (`pick-ui-library` does, for toasts, drawers and
   command menus), this rule wins.
 - In a standalone HTML file or an HTML artifact, the component's code is written into the file. A script loaded from
@@ -40,7 +37,7 @@ ships ready-made buttons, dialogs, tables or toasts.
 Sources:
 
 - https://ui.shadcn.com
-- https://arcui.dev
+- https://uiarc.dev
 - https://beautifului.dev
 - https://beui.dev
 - https://rareui.com
