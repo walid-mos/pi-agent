@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: Our rules for front-end work - how a page is structured, where UI components come from and how their code enters a project. Use when building, changing or reviewing a user interface - a web page, a component, a layout, styles, a React, Vue, Svelte, HTML or CSS file, a standalone HTML file or an HTML artifact, a landing page, a dashboard, a prototype - and before adding a UI component, a UI library or any front-end dependency, even for a one-line change. Emil Kowalski's vendored skills (`emil-design-eng`, `animate`, `pick-ui-library` and the others) cover motion and polish; where one of them disagrees with this skill, this one wins.
+description: Our rules for front-end work - how a page is structured, where UI components come from, how their code enters a project and what draws a diagram. Use when building, changing or reviewing a user interface - a web page, a component, a layout, styles, a React, Vue, Svelte, HTML or CSS file, a standalone HTML file or an HTML artifact, a landing page, a dashboard, a prototype, a diagram, a schema, a flowchart, an architecture or data-model view - and before adding a UI component, a UI library or any front-end dependency, even for a one-line change. Emil Kowalski's vendored skills (`emil-design-eng`, `animate`, `pick-ui-library` and the others) cover motion and polish; where one of them disagrees with this skill, this one wins.
 ---
 
 # Frontend
@@ -24,6 +24,53 @@ your report which part needed React and why.
 
 The sources below are mostly React. A component being available there in React is not a reason to use React: for an
 element with no client state, take its markup and styles into the static page.
+
+## Diagrams
+
+Two tools, chosen by what the reader does with the diagram. Both are capability dependencies.
+
+| The reader... | Tool |
+|---|---|
+| reads it: it fits in one view, and a node is a label | Pele (https://pele.run), Mermaid text rendered to SVG |
+| explores it: the user called it complex, a node carries more than a label (a status, fields, metrics, actions), it does not fit in one view at a readable size, or the reader has to act on it (expand, filter, select, step through) | React Flow (`@xyflow/react`, https://reactflow.dev) |
+
+Never Mermaid.js: Pele reads the same syntax. When Pele refuses a diagram (its `supports()` says no, or it throws),
+say so to the user rather than switching renderer.
+
+Both libraries change faster than an agent's memory of them: write from their documentation, read each time, and
+for React Flow from the documentation of the major version the project has installed.
+
+### Pele
+
+- It needs no React: it runs in a static page, and in a standalone HTML file from its browser script. A Pele
+  diagram is never a reason for an island.
+- Colours and fonts come from the project's design tokens, mapped onto Pele's `--pele-*` CSS variables: Mermaid
+  themes and `themeVariables` do nothing there.
+- No `style` or `classDef` colours in the diagram source: they are fixed values that do not follow the theme, so
+  they break in dark mode. Target a node from CSS instead.
+- Mermaid `click` callbacks are ignored. A diagram that needs more than a link on a node is a React Flow diagram.
+
+### React Flow
+
+A React Flow diagram is a small application, not a picture with pan and zoom: delivering the default nodes with a
+label, laid out by hand, is the result the user rejects.
+
+- It is React, so it is an island that holds the diagram and nothing else.
+- Every node and edge type is a custom component built with the project's own components and tokens. React Flow UI
+  (https://reactflow.dev/ui) is one more source for them, under the vendoring rules below.
+- Positions are computed by a layout library, never typed in: dagre for a tree or a layered graph; elkjs once nodes
+  are grouped in sub-flows or edges must route around nodes, which dagre does not do. Lay out after the nodes are
+  measured, and again each time the set of visible nodes changes, animating nodes to their new positions.
+- The diagram answers the reader:
+  - hovering or selecting a node highlights what it is connected to and dims the rest;
+  - groups collapse and expand, starting collapsed when the whole graph would not be readable in one view;
+  - a node shows a summary, and its detail opens in a panel beside the diagram when selected;
+  - beyond one view, there is a search or a filter that moves the viewport to the result;
+  - the viewport refits when the content changes;
+  - an edge is animated only to say something moves along it (a direction, a live state), never as decoration.
+- Before a diagram of more than a hundred nodes, read https://reactflow.dev/learn/advanced-use/performance.
+- Never hide the React Flow attribution (`proOptions.hideAttribution`): its authors allow that to Pro subscribers
+  only. If it has to go, ask the user.
 
 ## Components are vendored, never installed
 
