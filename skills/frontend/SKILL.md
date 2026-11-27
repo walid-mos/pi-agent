@@ -9,8 +9,12 @@ description: Our rules for front-end work - how a page is structured, where UI c
 
 Never deliver an interface as one long page that stacks every section and is read by scrolling: it is the default
 shape an agent produces, and the user rejects it. Give each purpose its own view (a route, a tab, a step, a panel)
-reached through navigation, and size a view so that its main content and its main action are visible without
-scrolling. Scrolling is for content that is one continuous thing: an article, a list, a feed, a table.
+reached through navigation, and size a view so that its first screen holds its point and its main action.
+
+Below that first screen a view may go on, since the user accepts length that is cut cleanly: content that serves the
+same purpose (proof, detail, questions), in sections that each make one point. Never another view's content and never
+filler: that is the length the user rejects. Scrolling also carries content that is one continuous thing: an article,
+a list, a feed, a table, a row of cards that scrolls sideways.
 
 This holds for a standalone HTML file and an HTML artifact too: several views inside the one file, switched by
 navigation, not one tall document.
@@ -107,8 +111,8 @@ What a chart says is set here:
 
 ### Dashboard
 
-- The page structure rule holds: a dashboard view shows its KPI tiles and its charts without scrolling, and what
-  does not fit is another view.
+- A dashboard view is stricter than the page structure rule: it shows its KPI tiles and its charts without
+  scrolling, and what does not fit is another view.
 - A KPI tile shows the value with its unit, the change against a period it names, and a sparkline.
 - A chart or a tile is in one of four declared states: loading (a skeleton at the final size, so nothing shifts),
   empty (saying for which filter), failed (showing the cause, never an empty or zeroed chart in its place), ready.
