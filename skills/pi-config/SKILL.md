@@ -15,7 +15,7 @@ For looks, read `tui.md`, `themes.md` and, in `extensions.md`, Custom Rendering,
 | Change | Place |
 |---|---|
 | Colors | a theme, `~/.pi/agent/themes/<name>.json`, selected by `theme` in `settings.json` |
-| How a tool call, message or entry is drawn; footer, editor, widgets | an extension, `~/.pi/agent/extensions/<name>.ts` or `<name>/index.ts` |
+| How a tool call, message or entry is drawn; footer, editor, widgets | an extension, `~/.pi/agent/extensions/<name>/index.ts` (the `harness` skill names and places it) |
 | Preferences, keys | `~/.pi/agent/settings.json`, `~/.pi/agent/keybindings.json` |
 | An extension with npm dependencies | a package in `~/.config/pi` (Pi's `packages.md`): git tracks `~/.pi/agent/extensions/` whole, `node_modules` included |
 | Anything private to a client | `~/.config/pi/pi-<domain>/` |
