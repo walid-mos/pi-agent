@@ -92,10 +92,17 @@ Write from the Recharts documentation, read each time.
 
 ### Form and content
 
-How a chart looks (colours, fonts, shapes of bars, lines and areas, grid, spacing, motion) is the design system's
-alone: this skill sets none of it. A chart takes every visual value from the project's design system, through
-its tokens and its chart components, and hard-codes none. When the design system does not cover something a chart
-needs, ask the user rather than inventing a style.
+How a chart, a KPI tile and a dashboard look is modelled on the references at
+https://vibrant.design/search?q=dashboard: the user holds them up as the standard, and Recharts' defaults or an
+agent's own taste are what the user rejects. Before building or restyling one, open that page, pick the references
+closest to the data shown, and look at their images, not only their titles: reading the page as text gives titles and
+image URLs, so view the images themselves; an item's own page adds a description. Take from them the treatment (how a
+tile is composed, how lines, areas and bars are drawn and highlighted, the grid, the tooltip, the density), and name
+the references used in your report.
+
+The values stay the design system's: colours, fonts, radii and spacing come from the project's tokens and none is
+hard-coded, so a chart follows the theme and dark mode. When the project already has its own chart components, they
+are kept, so that every chart of the product looks alike, and the references fill only what they do not cover.
 
 What a chart says is set here:
 
