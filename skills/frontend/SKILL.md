@@ -28,9 +28,10 @@ element with no client state, take its markup and styles into the static page.
 ## Components are vendored, never installed
 
 A component's source code is copied into the project and committed there, so that it can be read, restyled and fixed
-like the rest of the code. A dependency is added only for a capability a component is built on (an animation engine
-such as `motion`, the headless primitives of Base UI, the Lucide icons), never for a component itself: no package
-that ships ready-made buttons, dialogs, tables or toasts.
+like the rest of the code. A dependency is added only for a capability a component is built on (an animation
+engine, headless primitives, icons, charts, drag and drop, and the like), never for a component itself: no package
+that ships ready-made buttons, dialogs, tables or toasts. A capability dependency needs no approval from the user,
+except that three choices are fixed: `motion` for animation, Base UI for headless primitives, Lucide for icons.
 
 - Before writing a component by hand, look for it in the sources below, and take it from the one whose stack
   matches the project.
