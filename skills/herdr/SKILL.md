@@ -31,7 +31,15 @@ If a command is missing or behaves differently from what you expect, read `hc <c
 - Name every terminal you start and give it an exact scope. Clean up the terminals you started when the task ends,
   except those the user wants to watch or keep: start those with `--outlive-parent` and, to show one, give it a tab
   (`herdr-app do terminal.keep --terminal <id> --place tab`, see `herdr-app --skill`).
+- An agent you started that stops on a permission or trust prompt is a blocker for the user, as the global
+  `AGENTS.md` says: never answer it with `hc keys` or `hc send --force`, even though the manual shows
+  `hc keys <t> down enter` for a trust dialog. Tell the user which prompt it is and where, and carry on with the work
+  that does not need that agent.
+- `hc send` delivers a message, never a command: the text reaches the other agent marked as coming from you, so a
+  slash command sent this way (`/compact`, for example) is read as plain text and does nothing.
 - Long or slow commands (builds, installs, deploys, tests) run in an hc terminal, not in your own shell.
+- A run that goes on while nobody is at the machine (an agent, a long test suite) starts under `caffeinate -is`:
+  otherwise the Mac goes to sleep, which freezes the run and fails every test that measures time.
 - Before starting several heavy programs or agents at once, read `references/machine-load.md`: how much the
   machine can carry and what to do when it struggles.
 - Secrets follow the `infisical` skill: never type a secret into a terminal, a `send` or a task description.
