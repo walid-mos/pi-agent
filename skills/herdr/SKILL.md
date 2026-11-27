@@ -1,9 +1,9 @@
 ---
 name: herdr
-description: Drives Herdr - the Herdr App window (spaces, tabs, panes) through herdr-app, and persistent terminals, programs and coding agents through herdr-core (hc), on this machine or another machine of the user. Use when starting, delegating to, watching, messaging or cleaning up agents or long-running programs in terminals, when changing what the user sees in the Herdr window, or when working across the user's machines with hc.
+description: Our rules for driving Herdr - the Herdr App window (spaces, tabs, panes) through herdr-app, and persistent terminals, programs and coding agents through herdr-core (hc), on this machine or another machine of the user. Use when starting, delegating to, watching, messaging or cleaning up agents or long-running programs in terminals, when changing what the user sees in the Herdr window, or when working across the user's machines with hc.
 ---
 
-# Herdr
+# Herdr: terminals, agents and the app window
 
 Herdr ships its own agent manuals inside its binaries, always matching the installed version. This skill only says
 which manual to read and adds our local rules; it never replaces the manuals.

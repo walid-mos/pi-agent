@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: run.sh VAULT ENV FOLDER -- COMMAND [ARG...]
+# usage: run-with-secrets.sh VAULT ENV FOLDER -- COMMAND [ARG...]
 # Runs COMMAND with the secrets of one folder of one vault as environment variables, through the user's CLI session.
 # VAULT is the vault's name as `infisical sm projects list` shows it ("Accor - Product-data-apps", core, ...), ENV an
 # environment slug of that vault (dev, main, ...), FOLDER an absolute path in it: / for a project vault, whose
@@ -9,9 +9,9 @@
 # start silently without its environment.
 set -euo pipefail
 
-die() { echo "run.sh: $*" >&2; exit 1; }
+die() { echo "run-with-secrets.sh: $*" >&2; exit 1; }
 
-[ $# -ge 5 ] && [ "$4" = "--" ] || { echo "usage: run.sh VAULT ENV FOLDER -- COMMAND [ARG...]" >&2; exit 2; }
+[ $# -ge 5 ] && [ "$4" = "--" ] || { echo "usage: run-with-secrets.sh VAULT ENV FOLDER -- COMMAND [ARG...]" >&2; exit 2; }
 vault=$1 environment=$2 folder=$3; shift 4
 case "$folder" in /*) ;; *) die "FOLDER must be an absolute path, got '$folder'" ;; esac
 

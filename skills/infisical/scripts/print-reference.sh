@@ -1,6 +1,6 @@
 #!/bin/bash
-# usage: ref.sh NAME        prints one NON-SECRET homelab reference value from core:/homelab/reference
-#        ref.sh --list      prints the names only
+# usage: print-reference.sh NAME        prints one NON-SECRET homelab reference value from core:/homelab/reference
+#        print-reference.sh --list      prints the names only
 # Refuses names that are not in /homelab/reference; references (${...}) and imports are never resolved,
 # so it cannot be used to print a secret stored elsewhere.
 set -euo pipefail

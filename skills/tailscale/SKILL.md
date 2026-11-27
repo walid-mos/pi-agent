@@ -1,9 +1,9 @@
 ---
 name: tailscale
-description: Administers the user's tailnet through the Tailscale API - policy (ACL) changes with ETag and built-in tests, tag conventions, one-time tagged auth keys, device tags and key expiry, SSH host aliases. Use when adding a machine or service to the tailnet, changing who can reach what, creating an auth key, retagging a device, or debugging tailnet access.
+description: Our rules for administering the user's tailnet through the Tailscale API - policy (ACL) changes with ETag and built-in tests, tag conventions, one-time tagged auth keys, device tags and key expiry, SSH host aliases. Use when adding a machine or service to the tailnet, changing who can reach what, creating an auth key, retagging a device, or debugging tailnet access.
 ---
 
-# Tailscale administration
+# Tailscale: administering the tailnet
 
 The tailnet policy is the source of truth for network access in the homelab. Every change goes through the API, is
 validated, is protected by its own tests, and is read back. Nothing here is specific to a machine: tailnet name, tag
@@ -13,8 +13,8 @@ registry, addresses and IDs are read from Infisical (`core:/homelab/reference`),
 
 - Load the local Infisical pointers: `. ~/.config/infisical/core.env` (`INFISICAL_DOMAIN`, `INFISICAL_CORE_ID`, rendered by
   chezmoi from the machine's local data). If the file is missing, stop and ask the user.
-- Read the tag registry with the `infisical` skill's helper: `../infisical/scripts/ref.sh TAILSCALE_TAGS` (JSON `{tag: role}`).
-- Every API call goes through `scripts/tsapi.sh METHOD PATH [curl args]`. The OAuth client secret comes from Infisical and
+- Read the tag registry with the `infisical` skill's helper: `../infisical/scripts/print-reference.sh TAILSCALE_TAGS` (JSON `{tag: role}`).
+- Every API call goes through `scripts/call-api.sh METHOD PATH [curl args]`. The OAuth client secret comes from Infisical and
   only lives in memory; the bearer token reaches curl through a file descriptor. The script prints `HTTP <code>` on stderr
   and exits non-zero for any status >= 400. Never print the secret or the token.
 - Work in a temporary directory outside any repository (`d=$(mktemp -d)`): policy files are private homelab data.
@@ -35,7 +35,7 @@ registry, addresses and IDs are read from Infisical (`core:/homelab/reference`),
 The policy is HuJSON with comments: always GET it as HuJSON (the default, or `-H 'Accept: application/hujson'`) and send it
 with `--data-binary @file` (`-d @file` strips newlines, so a `//` comment would swallow the rest of the policy).
 
-- [ ] `scripts/tsapi.sh GET tailnet/-/acl -D "$d/h0" -o "$d/p0.hujson"`. ETag: `etag=$(sed -n 's/^etag: //Ip' "$d/h0" | tr -d '\r')`
+- [ ] `scripts/call-api.sh GET tailnet/-/acl -D "$d/h0" -o "$d/p0.hujson"`. ETag: `etag=$(sed -n 's/^etag: //Ip' "$d/h0" | tr -d '\r')`
       (the value already includes its double quotes). `p0.hujson` is the rollback.
 - [ ] Edit a copy (`p1.hujson`) with a small script that replaces fixed text **anchors** (an existing line or block copied
       exactly) and asserts each anchor occurs exactly once, so the edit is idempotent and fails loudly on drift.
@@ -44,10 +44,10 @@ with `--data-binary @file` (`-d @file` strips newlines, so a `//` comment would 
 - [ ] Add **tests** for the change, in the policy's `tests` block:
       `{"src": "<caller>", "accept": ["tag:x:443"]}` for each intended caller and
       `{"src": "tag:<other>", "deny": ["tag:x:443"]}` for every other tag. A rule without tests is not done.
-- [ ] `scripts/tsapi.sh POST tailnet/-/acl/validate -H 'Content-Type: application/hujson' --data-binary @"$d/p1.hujson"`
+- [ ] `scripts/call-api.sh POST tailnet/-/acl/validate -H 'Content-Type: application/hujson' --data-binary @"$d/p1.hujson"`
       returns `{}`.
 - [ ] Show the user the diff and get a go, unless the change was already approved in a plan.
-- [ ] `scripts/tsapi.sh POST tailnet/-/acl -H 'Content-Type: application/hujson' -H "If-Match: $etag" --data-binary @"$d/p1.hujson"`.
+- [ ] `scripts/call-api.sh POST tailnet/-/acl -H 'Content-Type: application/hujson' -H "If-Match: $etag" --data-binary @"$d/p1.hujson"`.
 - [ ] Read back into `p1.readback` and `cmp` it with `p1.hujson`; record the new ETag. Tailscale may re-wrap long lines:
       if `cmp` differs, compare the parsed content (comments and trailing commas stripped) before concluding.
 - [ ] Test real access for the callers concerned (curl through the tailnet, SSH). Deny paths are covered by the tests.
@@ -66,7 +66,7 @@ Someone (maybe an earlier run of yours) changed the policy since your GET.
 ## Auth keys
 
 - Keys are **one-time**, **pre-authorized**, **tagged** with exactly the role tag, non-ephemeral for servers, valid 1 hour.
-- Create and deliver them in one step: `scripts/authkey.sh <tag> <description> <ssh-target> <remote-file>`. The script
+- Create and deliver them in one step: `scripts/create-auth-key.sh <tag> <description> <ssh-target> <remote-file>`. The script
   writes `TS_AUTHKEY=...` into the remote file (`0600`) over SSH, compares SHA-256 on both sides and prints only the key ID.
   Never create a key any other way: an agent's shell has no terminal, so anything printed lands in the transcript.
 - After the node joins: find it with `GET tailnet/-/devices` (filter on `hostname`), check `tags` and `keyExpiryDisabled`

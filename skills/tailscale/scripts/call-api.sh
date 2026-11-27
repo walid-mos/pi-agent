@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: tsapi.sh METHOD PATH [curl args...]   (PATH is relative to https://api.tailscale.com/api/v2/)
+# usage: call-api.sh METHOD PATH [curl args...]   (PATH is relative to https://api.tailscale.com/api/v2/)
 # The OAuth client secret is read from Infisical (core:/tools/tailscale) and stays in memory;
 # the access token reaches curl through a file descriptor. Neither is ever printed or passed as an argument.
 # The HTTP status is printed on stderr ("HTTP 200"); curl exits non-zero (22) for any status >= 400, body still printed.

@@ -7,7 +7,7 @@ Herdr theme of the current appearance, optionally presses keys, then draws the e
 Arguments after `--` go to pi. Prints the path of each PNG written; each PNG has a .txt twin with the screen text.
 
 Example:
-  pishot.sh --out /tmp/shots/end.png --step key:ctrl+o --step shot:/tmp/shots/expanded.png -- -e ./ext.ts
+  capture-screen.sh --out /tmp/shots/end.png --step key:ctrl+o --step shot:/tmp/shots/expanded.png -- -e ./ext.ts
 """
 
 import argparse
@@ -37,7 +37,7 @@ HERDR = Path.home() / ".config/herdr-app"  # the terminal the user runs Pi in; i
 
 
 def fail(message: str) -> None:
-    sys.exit(f"pishot: {message}")
+    sys.exit(f"capture-screen: {message}")
 
 
 # ---------------------------------------------------------------------------
@@ -300,7 +300,7 @@ class Glyphs:
                            (False, True): "Italic", (True, True): "BoldItalic"}.items():
             font = find_font(f"{stem}-{style}", size)
             if font is None:
-                print(f"pishot: no {stem}-{style} font file; {style} text is drawn with Regular", file=sys.stderr)
+                print(f"capture-screen: no {stem}-{style} font file; {style} text is drawn with Regular", file=sys.stderr)
             self.styles[key] = font or regular
         self.cmap = cmap_of(regular)
         self.fallbacks = [(font, cmap_of(font)) for font in (find_font(n, size) for n in GLYPH_FALLBACKS) if font]
@@ -602,9 +602,9 @@ def capture(argv: list[str], args: argparse.Namespace, palette: dict, appearance
             args.out.with_suffix(".ansi").write_bytes(bytes(raw))
             args.out.with_suffix(".log").write_text("\n".join(queries) + "\n")
         if not exited:
-            print(f"pishot: pi (pid {pid}) survived SIGKILL; kill it by hand", file=sys.stderr)
+            print(f"capture-screen: pi (pid {pid}) survived SIGKILL; kill it by hand", file=sys.stderr)
     if glyphs.missing:
-        print(f"pishot: no font has these glyphs, drawn as boxes: {''.join(sorted(glyphs.missing))}", file=sys.stderr)
+        print(f"capture-screen: no font has these glyphs, drawn as boxes: {''.join(sorted(glyphs.missing))}", file=sys.stderr)
     if not alive:
         fail(f"pi exited before the last screenshot; its last screen is in {args.out.with_suffix('.txt')}")
 
@@ -641,7 +641,7 @@ def main() -> None:
     if shutil.which("pi") is None:
         fail("pi is not on PATH")
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="pishot-") as work:
+    with tempfile.TemporaryDirectory(prefix="capture-screen-") as work:
         capture(pi_argv(args, Path(work)), args, palette, appearance, glyphs)
 
 

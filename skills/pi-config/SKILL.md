@@ -1,6 +1,6 @@
 ---
 name: pi-config
-description: Our workflow for changing the user's Pi configuration and checking how Pi looks - where a theme, an extension (tool, message or entry renderer, footer, editor, widget), a setting or a keybinding goes, and how to screenshot Pi's terminal UI on a fake or real session without calling a model. Use when creating, editing or reviewing a Pi theme, extension, renderer, setting or keybinding, when the user asks to customize, restyle or redesign how Pi looks (transcript, tool calls, messages, footer, editor), after `pi update`, and whenever the user asks to see, preview, test or screenshot a Pi conversation, even for a one-line change. For skills, `harness` applies instead.
+description: Our rules for changing the user's Pi configuration and checking how Pi looks - where a theme, an extension (tool, message or entry renderer, footer, editor, widget), a setting or a keybinding goes, and how to screenshot Pi's terminal UI on a fake or real session without calling a model. Use when creating, editing or reviewing a Pi theme, extension, renderer, setting or keybinding, when the user asks to customize, restyle or redesign how Pi looks (transcript, tool calls, messages, footer, editor), after `pi update`, and whenever the user asks to see, preview, test or screenshot a Pi conversation, even for a one-line change. For skills, `harness` applies instead.
 ---
 
 # Pi configuration: change it, then look at it
@@ -33,7 +33,7 @@ Judge a visual change from a capture, never from the code alone, and never from 
 costs and gives a different conversation each time.
 
 ```sh
-scripts/pishot.sh --out <scratch>/end.png --step key:ctrl+o --step shot:<scratch>/expanded.png
+scripts/capture-screen.sh --out <scratch>/end.png --step key:ctrl+o --step shot:<scratch>/expanded.png
 ```
 
 - It runs the real `pi` with the whole configuration, as a new session starts, on a fake session written by
@@ -45,7 +45,7 @@ scripts/pishot.sh --out <scratch>/end.png --step key:ctrl+o --step shot:<scratch
 - Arguments after `--` go to `pi`: `-e <file>` adds an extension that is not in place yet, `-ne -e <file>` loads only
   that one, `--theme <file> --use-theme <name>` a theme.
 - Steps run in order: `key:<name>` (`ctrl+o` expands tool output, `pageup` scrolls up), `text:<chars>`,
-  `wait:<seconds>`, `shot:<png>`. The last screen goes to `--out`. `scripts/pishot.sh --help` lists every option.
+  `wait:<seconds>`, `shot:<png>`. The last screen goes to `--out`. `scripts/capture-screen.sh --help` lists every option.
 - `--blank` starts without a session: the startup screen, which lists the loaded context, skills and extensions and
   reports theme errors under `[Theme conflicts]` (raise `--rows` when the list is cut).
 - Each PNG has a `.txt` twin with the screen text: search it rather than reading the image for text.
@@ -58,7 +58,7 @@ Read every PNG with your image-reading tool and, for each element you changed, c
 - `--appearance dark` and `light`, when colors changed;
 - collapsed and expanded (`key:ctrl+o`), success and failure, for a tool renderer.
 
-A broken extension stops Pi at startup: `pishot.sh` then exits non-zero and the `.txt` holds Pi's error.
+A broken extension stops Pi at startup: `capture-screen.sh` then exits non-zero and the `.txt` holds Pi's error.
 
 Then give the user the PNG paths with one line on what each shows.
 
@@ -78,7 +78,7 @@ cleanly and that every customized element still looks as intended.
 
 ## Requirements
 
-`scripts/pishot.sh` runs `scripts/pishot.py` in a virtualenv it creates in `~/.cache/pi-config/` on first use (this
-needs the network); read `pishot.py` only to change how captures are made. It needs `python3`, `node`, `pi` on
+`scripts/capture-screen.sh` runs `scripts/capture-screen.py` in a virtualenv it creates in `~/.cache/pi-config/` on first use (this
+needs the network); read `capture-screen.py` only to change how captures are made. It needs `python3`, `node`, `pi` on
 `PATH`, macOS (its fonts and appearance setting), and Herdr's `~/.config/herdr-app/settings.json` unless `--font` and
 `--palette` are given.

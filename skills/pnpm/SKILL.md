@@ -3,7 +3,7 @@ name: pnpm
 description: Our rules for pnpm's release-age gate (`minimumReleaseAge`), which refuses a package version published too recently - what to do when an install or an update is refused for that reason, and how the user's own packages are exempted. Use when a pnpm command fails on the minimum release age or with "no mature matching version", when adding or updating a dependency to a version published in the last days, when installing a package the user has just published, or before changing `minimumReleaseAge` or `minimumReleaseAgeExclude` in any pnpm configuration, even for a one-line change.
 ---
 
-# pnpm
+# pnpm: the release-age gate
 
 ## Release-age gate
 

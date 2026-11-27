@@ -1,7 +1,7 @@
 #!/bin/bash
-# usage: cpsecret.sh SRC_PROJECT SRC_ENV SRC_PATH SRC_NAME DST_PROJECT DST_ENV DST_PATH DST_NAME
+# usage: copy-secret.sh SRC_PROJECT SRC_ENV SRC_PATH SRC_NAME DST_PROJECT DST_ENV DST_PATH DST_NAME
 # Copies one secret without ever printing it or passing it as an argument, then compares SHA-256 hashes.
-# Projects are IDs (see ref.sh VAULT_<NAME>_ID). Login profile: set INFISICAL_PROFILE explicitly when several exist.
+# Projects are IDs (see print-reference.sh VAULT_<NAME>_ID). Login profile: set INFISICAL_PROFILE explicitly when several exist.
 # Creates the destination folder if needed. Copies only; to move, delete the source afterwards (see SKILL.md).
 set -euo pipefail
 . "${INFISICAL_CORE_ENV:-$HOME/.config/infisical/core.env}"

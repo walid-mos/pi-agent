@@ -3,7 +3,7 @@ name: phase-review
 description: Our rules for having finished work reviewed by another agent - the simplify pass and the code review that a Claude Code session runs over a phase of a plan or a finished change (when to start them, the scope and context to give, how the result comes back, which findings reach the user). Use when a plan or the user asks for a review, a `/simplify` or a `/code-review` of work just done, when a phase of a plan is finished, before starting a reviewer agent, and when sorting a reviewer's findings. Starting and watching the reviewer's terminal follows the `herdr` skill.
 ---
 
-# Phase review
+# Phase review: finished work reviewed by another agent
 
 A reviewer is a Claude Code session that runs `/simplify --fix` or `/code-review <effort> --fix` on finished work, in
 a terminal started as the `herdr` skill says.

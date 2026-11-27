@@ -1,9 +1,9 @@
 ---
 name: infisical
-description: Operates the user's self-hosted Infisical - reading and copying secrets without ever exposing them, giving any repository (the user's or a client's) its secrets and environment variables from outside it, without a `.env` and without any trace of Infisical in the repository, the vault (project) and machine identity model, homelab reference values, backups, restore tests and upgrades of the instance. Use whenever a task reads, writes, moves or rotates a secret, needs a secret, an API key, a token or an environment variable to run, test or deploy code, meets or is about to create a `.env` file, is about to add anything about Infisical to a repository, creates a project or a machine identity, gives a machine access to secrets, or maintains the Infisical server. Takes precedence over the generic infisical-* skills, which remain the reference for general documentation.
+description: Our rules for the user's self-hosted Infisical - reading and copying secrets without ever exposing them, giving any repository (the user's or a client's) its secrets and environment variables from outside it, without a `.env` and without any trace of Infisical in the repository, the vault (project) and machine identity model, homelab reference values, backups, restore tests and upgrades of the instance. Use whenever a task reads, writes, moves or rotates a secret, needs a secret, an API key, a token or an environment variable to run, test or deploy code, meets or is about to create a `.env` file, is about to add anything about Infisical to a repository, creates a project or a machine identity, gives a machine access to secrets, or maintains the Infisical server. Takes precedence over the generic infisical-* skills, which remain the reference for general documentation.
 ---
 
-# Infisical (self-hosted)
+# Infisical: the user's self-hosted secrets
 
 This skill holds **our rules**. For general product documentation (CLI flags, auth methods, SDKs, Docker and Kubernetes
 deployment, roles), read the vendored official skills `infisical-setup`, `infisical-self-host` and
@@ -14,10 +14,10 @@ deployment, roles), read the vendored official skills `infisical-setup`, `infisi
 - `~/.config/infisical/core.env`: `INFISICAL_DOMAIN` and `INFISICAL_CORE_ID`, rendered by chezmoi from each machine's
   local data (never committed). Source it first: `. ~/.config/infisical/core.env`. Missing file: stop and ask the user.
 - `core:/homelab/reference`: every other identifier (vault IDs, service URLs, tailnet name, tag registry, network
-  plan). Not secret, but private: read them with `scripts/ref.sh NAME`, never copy them into a repository.
+  plan). Not secret, but private: read them with `scripts/print-reference.sh NAME`, never copy them into a repository.
 - The CLI user session belongs to the user. An agent running unattended must not borrow it (see identities below).
 
-## Secret handling rules (non-negotiable)
+## Secret handling rules
 
 1. **No value on screen, in a log, in shell history or in a command argument.** Only names, counts and SHA-256 hashes
    may be printed.
@@ -26,7 +26,7 @@ deployment, roles), read the vendored official skills `infisical-setup`, `infisi
 3. Write with `infisical secrets set NAME=@file` (the CLI reads the file) and never `NAME=value`.
 4. Read inside `infisical run ... -- sh -c '...'` and use the variable there; strip every variable the child does not
    need (`env -u ...`, including `INFISICAL_TOKEN` when a machine token was exported) before launching a program.
-5. **Every copy is verified**: hash the source and the destination value and compare (`scripts/cpsecret.sh` does it).
+5. **Every copy is verified**: hash the source and the destination value and compare (`scripts/copy-secret.sh` does it).
 6. Never run `docker compose config`, `env`, `printenv` or `set` where secrets are loaded; never `cat` a `.env`.
 7. Anything printed by mistake is treated as leaked: tell the user and rotate it.
 
@@ -44,10 +44,10 @@ repository must work the same for anyone who does not have it.
 - The vault is named by the repository's domain skill, or by its `AGENTS.md` when it declares an exception (below).
   If neither names it, ask the user, because a guess from a directory name can read another project's vault; offer
   to record the answer in a domain skill, not in the repository.
-- Run whatever needs the environment through `scripts/run.sh` (run it; it needs `bash`, `infisical` and `jq`):
+- Run whatever needs the environment through `scripts/run-with-secrets.sh` (run it; it needs `bash`, `infisical` and `jq`):
 
   ```sh
-  bash <this skill's directory>/scripts/run.sh "<vault>" dev / -- <command>
+  bash <this skill's directory>/scripts/run-with-secrets.sh "<vault>" dev / -- <command>
   ```
 
   It finds the vault by its name, uses the user's CLI session and does not run the command when the vault, the
@@ -65,7 +65,7 @@ how others get their environment. Only the exception below lifts this.
   `package.json`, a Makefile, a compose file, a CI workflow, a README or a doc, no dependency, no `.gitignore` line,
   and no mention in a commit message, a branch name, a pull request or a ticket.
 - The repository's own mechanism stays as it is and its rules still apply (a new variable is documented in its
-  `.env.example` when the repository asks for it). Wrap the repository's own commands with `scripts/run.sh` from
+  `.env.example` when the repository asks for it). Wrap the repository's own commands with `scripts/run-with-secrets.sh` from
   outside instead of changing them.
 - If a command takes its environment only from a file and ignores the process environment, stop and ask the user
   rather than writing that file.
@@ -118,7 +118,7 @@ the Infisical web UI at the agreed vault and path, or writes it to a file they c
 you then send with `secrets set NAME=@file` and destroy. Confirm by name and hash only.
 
 **Moving a secret** (one source per secret):
-- [ ] `scripts/cpsecret.sh` to the destination (creates the folder, compares hashes).
+- [ ] `scripts/copy-secret.sh` to the destination (creates the folder, compares hashes).
 - [ ] Check that nothing references it: search the source vault for `${...NAME}` (names only) and the consumers' code and
       scripts for the old vault ID and path.
 - [ ] Switch every consumer to the new location and test it.
@@ -126,7 +126,7 @@ you then send with `secrets set NAME=@file` and destroy. Confirm by name and has
 - [ ] Remember that the source keeps the value in its version history and snapshots: rotate the secret if the source
       vault was readable by someone who must not have it.
 
-**Copying many secrets**: `scripts/cpsecret.sh` for one secret; for many, a mapping file and the same pattern
+**Copying many secrets**: `scripts/copy-secret.sh` for one secret; for many, a mapping file and the same pattern
 (export the source folder as JSON into a `0600` file, write each value to its own file, `secrets set NAME=@file`, read
 back, compare per-key hashes, check that the destination holds exactly the expected names, `rm -P` everything).
 

@@ -3,7 +3,7 @@ name: frontend
 description: Our rules for front-end work - how a page is structured, where UI components come from, how their code enters a project, what draws a diagram or a chart and how a dashboard is built. Use when building, changing or reviewing a user interface - a web page, a component, a layout, styles, a React, Vue, Svelte, HTML or CSS file, a standalone HTML file or an HTML artifact, a landing page, a dashboard, a prototype, a chart, a graph, a KPI tile, a diagram, a schema, a flowchart, an architecture or data-model view - and before adding a UI component, a UI library or any front-end dependency, even for a one-line change. Emil Kowalski's vendored skills (`emil-design-eng`, `animate`, `pick-ui-library` and the others) cover motion and polish; where one of them disagrees with this skill, this one wins.
 ---
 
-# Frontend
+# Frontend: page structure, components, diagrams and charts
 
 ## Page structure
 

@@ -10,7 +10,7 @@
 | Personal | VM (sandbox per domain) | `perso-<machine>` | `perso` |
 | Accor | VM | `accor-<machine>`; `accor-ci-<repo>` (OIDC) | `accor` |
 
-Vault IDs: `scripts/ref.sh VAULT_<NAME>_ID`. Projects not in this table (kept as-is from a migration) have no identity
+Vault IDs: `scripts/print-reference.sh VAULT_<NAME>_ID`. Projects not in this table (kept as-is from a migration) have no identity
 until a consumer appears; decide their vault then.
 
 ## Registry
