@@ -20,6 +20,14 @@
   the same change if you are changing either, otherwise tell the user. Where documentation states a rule or an
   intended behaviour that the code breaks, the code is wrong: say so and keep the rule.
 
+## What you tell the user
+
+- State as a fact only what you checked in this session on the thing itself: its configuration, its logs, a command
+  you ran. A design document, a manual or your memory says what was intended, not what runs. Say "not checked" for
+  the rest before the user has to ask.
+- Write for someone who was not watching: plain words, a term explained the first time it appears, and for each open
+  point what it changes for them and what you recommend. Leave out what changes nothing for them.
+
 ## Git workflow
 
 - Commit atomically: each commit is a small, self-contained change that builds, passes the tests and breaks
