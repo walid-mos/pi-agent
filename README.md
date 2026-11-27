@@ -16,6 +16,14 @@ it with a key command, so it is never written to a file: `pi-magpie-key MAGPIE_K
 copies it from Infisical and writes that command, on a new machine and after every rotation. Pi caches a key command
 that fails or times out, so that command must not depend on the network.
 
+## Compaction
+
+Pi compacts a session once its context exceeds the model's `contextWindow` minus `compaction.reserveTokens`
+(`settings.json`). The Magpie models declare a window of about a million tokens, so with Pi's default reserve a
+session is never compacted in practice and every turn reads its whole history again. The reserve in `settings.json`
+is therefore the window minus the context size at which compaction must start, with a model override where a window
+differs: a window changed in `models.json.tmpl` needs its reserve changed with it.
+
 ## Browser MCP servers
 
 `mcp.json` puts its browser servers on one shared Chromium: `e2e` acts on pages, `chrome` (chrome-devtools-mcp) only

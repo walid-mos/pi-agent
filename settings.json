@@ -5,5 +5,13 @@
   ],
   "defaultProvider": "magpie",
   "defaultModel": "group/router",
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "compaction": {
+    "reserveTokens": 773576,
+    "modelOverrides": {
+      "magpie/group/think": {
+        "reserveTokens": 725000
+      }
+    }
+  }
 }
