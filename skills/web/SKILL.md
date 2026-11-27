@@ -32,6 +32,9 @@ Never use one for another's job: a browser to read an article or an X post costs
 - `open_session {}` opens Chromium on a local start page: the first call is `navigate` to the site. Firefox and WebKit,
   for cross-browser passes only: `open_session {target: "firefox"}` or `{target: "webkit"}`.
 - Never pass `engine`: it asks for a private browser outside the shared one, and e2e refuses it here.
+- Once the controls are known, group consecutive form actions into one e2e `run_code` call to save model turns and
+  intermediate screenshots. Use semantic locators and stop the batch at any required user interaction. If the user
+  requires individual tools such as `type_secret`, sequence those calls in Codemode when it is available.
 - With more than one session open, pass `session` to every `call`, `tools` and `close_session` (otherwise
   `SESSION_REQUIRED`).
 - Close each session when done: a page left open on a site keeps the shared Chromium running.
@@ -46,9 +49,10 @@ Never use one for another's job: a browser to read an article or an X post costs
 
 ## The shared Chromium
 
-- e2e (target `chromium`) and `chrome` share one Chromium owned by `~/.local/bin/pi-chromium`. Opening a
-  Chromium session is the only thing that starts it; it stops by itself a while after the last page on a site closed
-  (a session still on the start page does not keep it running). Never start a browser another way.
+- e2e (target `chromium`) and `chrome` share one Chromium owned by `~/.local/bin/pi-chromium`. It stops by itself
+  a while after the last page on a site closed (a session still on the start page does not keep it running).
+- Open a Chromium session through e2e. For a user-approved visible session, first run `pi-chromium ensure --headed`
+  so e2e opens its window in the shared browser.
 - `pi-chromium status` when a session fails to open; `pi-chromium stop` only when the user asks: it ends every
   agent's Chromium sessions.
 - A session whose browser stopped (idle, or `pi-chromium stop`) fails with `APP_NOT_OPEN`: close it and open a new one.
@@ -87,8 +91,10 @@ how it works); you never see a password.
   during a rotation. Results show `<secret:name>`, never the value.
 - `agent-bw list` shows the logins; after `agent-bw sync` (or `create`, `discard`) a login is usable only in a session
   opened afterwards. No `type_secret` in a session means no login is declared: run `agent-bw sync`, open a new session.
-- Never run `agent-bw password`, `totp` or `previous-password`, never `bw`, and never read a secret with `run_code`:
-  they print it. `list`, `sync`, `create`, `rotate`, `confirm`, `revert` and `discard` print none.
+- In `run_code`, fill email with `credentials.user(name).username` and pass `credentials.user(name).password` directly
+  to the password locator's `fill`. Never inspect, return or log the password.
+- Never run `agent-bw password`, `totp` or `previous-password`, or call `bw` directly. Use `agent-bw trash <id>` when
+  the user asks to move a verified login to Bitwarden's Trash.
 - Sign-up, only where the user said the site is the agent's (otherwise ask first): `agent-bw create <name> <uri>
   <username>`, open a new session, sign up typing `<name>.password`, log out, log in again, then `agent-bw confirm
   <id>`. If the sign-up fails: `agent-bw discard <id>`.
