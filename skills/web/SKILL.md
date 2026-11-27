@@ -79,6 +79,26 @@ Log in only with a dedicated agent account, never one of the user's personal acc
 nothing else, and any process on this Mac can drive the shared Chromium through its debugging port (bound to
 localhost, on a dedicated profile). If no agent account exists for the site, stop and ask the user.
 
+The agent's logins live in its Bitwarden collection and reach e2e through `~/.local/bin/agent-bw` (its header says
+how it works); you never see a password.
+
+- A session's opening lists its credentials and secrets. Type a username with `type`; fill a password with
+  `type_secret` and the secret's name: `<name>.password`, `<name>.totp` for a one-time code, `<name>.previous-password`
+  during a rotation. Results show `<secret:name>`, never the value.
+- `agent-bw list` shows the logins; after `agent-bw sync` (or `create`, `discard`) a login is usable only in a session
+  opened afterwards. No `type_secret` in a session means no login is declared: run `agent-bw sync`, open a new session.
+- Never run `agent-bw password`, `totp` or `previous-password`, never `bw`, and never read a secret with `run_code`:
+  they print it. `list`, `sync`, `create`, `rotate`, `confirm`, `revert` and `discard` print none.
+- Sign-up, only where the user said the site is the agent's (otherwise ask first): `agent-bw create <name> <uri>
+  <username>`, open a new session, sign up typing `<name>.password`, log out, log in again, then `agent-bw confirm
+  <id>`. If the sign-up fails: `agent-bw discard <id>`.
+- Password change: `agent-bw rotate <id>`, open a new session, log in with `<name>.previous-password`, change the
+  password typing `<name>.password` as the new one, log out, log in with `<name>.password`, then `agent-bw confirm
+  <id>`. If the site refuses the change: `agent-bw revert <id>`.
+- Never leave an item `unverified-new` or `unverified-rotation` without telling the user.
+- A secret typed into a plain input shows in screenshots, and recordings are never masked: record nothing around a
+  login.
+
 ## The e2e command and repositories
 
 - The e2e tooling is pinned in `~/.config/pi/pi-vendor/packages/web-tools`, and `e2e` on the PATH is that install:
