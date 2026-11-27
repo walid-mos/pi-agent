@@ -79,33 +79,29 @@ second chart library for one chart type or one page, no chart drawn by hand in S
 library is what makes every chart of a product look and behave alike. Never ECharts: the user rejected its look.
 When Recharts cannot draw what is asked, say so to the user.
 
-Write from the Recharts documentation, read each time. In a project that uses shadcn, start from its chart
-component, vendored like any other.
+Write from the Recharts documentation, read each time.
 
 - A chart is React, so charts are a reason for an island: one island holds the charts of a view and their filters.
   A standalone HTML file loads React and Recharts as ES modules from a CDN.
 - A chart fills a container that has a size (`ResponsiveContainer`); inside a flex or grid cell the container needs
   `min-height: 0`, or the chart grows without end.
 
-### Look
+### Form and content
 
-Recharts' default look is never delivered.
+How a chart looks (colours, fonts, shapes of bars, lines and areas, grid, spacing, motion) is the design system's
+alone: this skill sets none of it. A chart takes every visual value from the project's design system, through
+its tokens and its chart components, and hard-codes none. When the design system does not cover something a chart
+needs, ask the user rather than inventing a style.
 
-- Colours are the design tokens, passed as CSS custom properties (`fill="var(--series-1)"`): no hex value in a chart,
-  so that light and dark follow the page without any code.
-- Remove what carries no data: no axis line, no tick line, no vertical grid line; horizontal grid lines dashed, in
-  the muted token. Text is the interface's font, with tabular numerals.
-- Bars have rounded ends. A line is smooth (`monotone`) with no dots, and an area fades from its colour to
-  transparent.
-- Several series on one area chart are each drawn from the baseline, not stacked: a stacked area draws the outline
-  of the stack once per series, in the colour of the top one.
-- A colour means one thing across the product: a series keeps its colour in every chart. The categorical palette
-  comes from the tokens and stops at six series; the rest is grouped as one "Other". A chart of one measure uses
-  the accent token.
-- The legend is the project's own markup in the card's header, shown only with more than one series and listing
-  only the series that have data.
+What a chart says is set here:
+
+- A series means one thing across the product, so it keeps the same token in every chart. Beyond six series, the
+  rest is grouped as one "Other".
+- A legend appears only with more than one series and lists only the series that have data.
 - One tooltip component serves every chart, and one module formats every number, date and unit (`Intl`) for axes,
   tooltips, tiles and tables alike.
+- Several series on one area chart are each drawn from the baseline, not stacked: a stacked area draws the outline
+  of the stack once per series.
 - No pie or donut beyond three slices, no second value axis, no 3D: each one is a default an agent reaches for and
   each makes the data harder to read.
 
