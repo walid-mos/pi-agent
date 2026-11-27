@@ -15,6 +15,16 @@ scrolling. Scrolling is for content that is one continuous thing: an article, a 
 This holds for a standalone HTML file and an HTML artifact too: several views inside the one file, switched by
 navigation, not one tall document.
 
+## Stack
+
+Build static first: plain HTML, or Astro when the site has several pages or shared layouts. React comes in only where
+the interface cannot work without it (state that lives in the browser, interaction that markup and CSS cannot
+express), and only for that part, as an island in the static page rather than a whole React application. Say in
+your report which part needed React and why.
+
+The sources below are mostly React. A component being available there in React is not a reason to use React: for an
+element with no client state, take its markup and styles into the static page.
+
 ## Components are vendored, never installed
 
 A component's source code is copied into the project and committed there, so that it can be read, restyled and fixed
