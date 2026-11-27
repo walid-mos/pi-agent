@@ -74,37 +74,40 @@ label, laid out by hand, is the result the user rejects.
 
 ## Charts and dashboards
 
-Every chart is drawn with Apache ECharts (https://echarts.apache.org), a capability dependency, and with nothing
-else: no second chart library for one chart type or one page, no chart drawn by hand in SVG, sparklines included.
-One library is what makes every chart of a product look and behave alike, and ECharts is the one that runs without
-React and stays fast on large series. shadcn's chart component is Recharts: do not take it. When ECharts cannot
-draw what is asked, say so to the user.
+Every chart is drawn with Recharts (https://recharts.org), a capability dependency, and with nothing else: no
+second chart library for one chart type or one page, no chart drawn by hand in SVG, sparklines included. One
+library is what makes every chart of a product look and behave alike. Never ECharts: the user rejected its look.
+When Recharts cannot draw what is asked, say so to the user.
 
-Write from the ECharts handbook and option reference, read each time.
+Write from the Recharts documentation, read each time. In a project that uses shadcn, start from its chart
+component, vendored like any other.
 
-- A chart needs no React: `echarts.init` on an element of a static page. Charts alone are never a reason for an
-  island. Inside an island that exists for another reason, a chart goes through one wrapper component written in
-  the project, never a wrapper package.
-- Import from `echarts/core` and register, in one module, only the chart types and components the project uses.
-  The full build is for a standalone HTML file only.
+- A chart is React, so charts are a reason for an island: one island holds the charts of a view and their filters.
+  A standalone HTML file loads React and Recharts as ES modules from a CDN.
+- A chart fills a container that has a size (`ResponsiveContainer`); inside a flex or grid cell the container needs
+  `min-height: 0`, or the chart grows without end.
 
 ### Look
 
-ECharts' default look is never delivered.
+Recharts' default look is never delivered.
 
-- One theme module per project builds the ECharts theme from the design tokens, read at run time from the page's
-  CSS custom properties (the canvas does not resolve `var()`), registers it, and switches it with `setTheme` when the
-  page's theme changes. A chart's option holds data and structure, never a colour, a font or a spacing.
-- The theme removes what carries no data: no border or background on a chart, no axis line or ticks on a value
-  axis, horizontal split lines only, in the muted token. Text is the interface's font, with tabular numerals.
+- Colours are the design tokens, passed as CSS custom properties (`fill="var(--series-1)"`): no hex value in a chart,
+  so that light and dark follow the page without any code.
+- Remove what carries no data: no axis line, no tick line, no vertical grid line; horizontal grid lines dashed, in
+  the muted token. Text is the interface's font, with tabular numerals.
+- Bars have rounded ends. A line is smooth (`monotone`) with no dots, and an area fades from its colour to
+  transparent.
+- Several series on one area chart are each drawn from the baseline, not stacked: a stacked area draws the outline
+  of the stack once per series, in the colour of the top one.
 - A colour means one thing across the product: a series keeps its colour in every chart. The categorical palette
-  comes from the tokens and stops at six series; the rest is grouped as one "Other". When a chart makes one point,
-  that series takes the accent and the others the muted token.
-- A legend appears only with more than one series, and a series is labelled at its line when there is room.
-- One tooltip formatter serves every chart, and one module formats every number, date and unit (`Intl`) for axes,
+  comes from the tokens and stops at six series; the rest is grouped as one "Other". A chart of one measure uses
+  the accent token.
+- The legend is the project's own markup in the card's header, shown only with more than one series and listing
+  only the series that have data.
+- One tooltip component serves every chart, and one module formats every number, date and unit (`Intl`) for axes,
   tooltips, tiles and tables alike.
-- No pie or donut beyond three slices, no second value axis, no 3D, no gradient fill that encodes nothing: each
-  one is a default an agent reaches for and each makes the data harder to read.
+- No pie or donut beyond three slices, no second value axis, no 3D: each one is a default an agent reaches for and
+  each makes the data harder to read.
 
 ### Dashboard
 
@@ -114,19 +117,17 @@ ECharts' default look is never delivered.
 - A chart or a tile is in one of four declared states: loading (a skeleton at the final size, so nothing shifts),
   empty (saying for which filter), failed (showing the cause, never an empty or zeroed chart in its place), ready.
 - A filter (period, segment) applies to the whole view and lives in the URL, so a view can be reloaded and shared.
-- Charts that share an axis are linked with `echarts.connect`, so the pointer and the zoom move them together.
+- Charts that share an axis share a `syncId`, so the pointer moves them together.
 
 ### Speed
 
+Recharts draws SVG, one element per point, and slows down with thousands of them: the speed of a chart is decided
+by what it is given.
+
 - Aggregate where the data lives, to the resolution displayed: the browser does not receive raw rows a query could
-  have grouped. A line with more points than its width in pixels sets `sampling: 'lttb'`.
-- Charts reading the same rows share one `dataset`.
-- New data, a new filter or a live tick is a `setOption` on the existing instance, with the data only. Never
-  dispose and re-create a chart to update it, and turn the update animation off when ticks come faster than it
-  lasts.
-- Create a chart when its view is shown, since its container must have a size at `init`. Resize it from a
-  `ResizeObserver` on its container, and `dispose` it when the container is removed.
-- Under `prefers-reduced-motion`, charts are created with `animation: false`.
+  have grouped, and a chart never receives more points than its width in pixels.
+- A value that cannot be summed from buckets (a median, a percentile) is computed at the source for each filter.
+- Under `prefers-reduced-motion`, charts are drawn with `isAnimationActive={false}`.
 
 ## Components are vendored, never installed
 
