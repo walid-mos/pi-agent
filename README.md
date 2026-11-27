@@ -18,11 +18,12 @@ that fails or times out, so that command must not depend on the network.
 
 ## Compaction
 
-Pi compacts a session once its context exceeds the model's `contextWindow` minus `compaction.reserveTokens`
-(`settings.json`). The Magpie models declare a window of about a million tokens, so with Pi's default reserve a
-session is never compacted in practice and every turn reads its whole history again. The reserve in `settings.json`
-is therefore the window minus the context size at which compaction must start, with a model override where a window
-differs: a window changed in `models.json.tmpl` needs its reserve changed with it.
+`extensions/checkpoint` replaces Pi's compaction. Past a context ceiling chosen with `/ceiling`, for one session or
+as the default kept in the machine-local `checkpoint.json`, it replaces older context with a checkpoint, and
+`history_read` reads the originals back; `/checkpoint` shows its state. Pi's own compaction keeps its default
+`compaction.reserveTokens`, so it fires only at the edge of a model's window, and the extension answers it too: a
+reserve set in `settings.json` would lower the highest ceiling `/ceiling` offers. How it works is in the header of
+`extensions/checkpoint/index.ts`.
 
 ## Browser MCP servers
 
