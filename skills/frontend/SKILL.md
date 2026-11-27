@@ -19,8 +19,8 @@ navigation, not one tall document.
 
 A component's source code is copied into the project and committed there, so that it can be read, restyled and fixed
 like the rest of the code. A dependency is added only for a capability a component is built on (an animation engine
-such as `motion`, the headless primitives a copied component imports), never for a component itself: no package that
-ships ready-made buttons, dialogs, tables or toasts.
+such as `motion`, the headless primitives of Base UI, the Lucide icons), never for a component itself: no package
+that ships ready-made buttons, dialogs, tables or toasts.
 
 - Before writing a component by hand, look for it in the sources below, and take it from the one whose stack
   matches the project.
@@ -29,6 +29,11 @@ ships ready-made buttons, dialogs, tables or toasts.
 - A command that writes component source into the project is vendoring: run it with the project's package manager,
   then read every file it wrote and every dependency it added before committing. A dependency it added that is itself
   a component package is not kept: take that component's source instead.
+- Headless primitives come from Base UI, never from Radix: one primitives library per project keeps behaviour and
+  bundle consistent. When a source offers a component on both, take its Base UI version. When it has only a Radix
+  version, take the component from another source, or rewrite its primitives on Base UI before committing.
+- Icons come from Lucide. An icon Lucide does not have is vendored: its SVG is copied into the project as a
+  component. Never a second icon package.
 - When another skill tells you to install a component package (`pick-ui-library` does, for toasts, drawers and
   command menus), this rule wins.
 - In a standalone HTML file or an HTML artifact, the component's code is written into the file. A script loaded from
