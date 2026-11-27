@@ -31,10 +31,10 @@ If a command is missing or behaves differently from what you expect, read `hc <c
 - Name every terminal you start and give it an exact scope. Clean up the terminals you started when the task ends,
   except those the user wants to watch or keep: start those with `--outlive-parent` and, to show one, give it a tab
   (`herdr-app do terminal.keep --terminal <id> --place tab`, see `herdr-app --skill`).
-- An agent you started that stops on a permission or trust prompt is a blocker for the user, as the global
-  `AGENTS.md` says: never answer it with `hc keys` or `hc send --force`, even though the manual shows
-  `hc keys <t> down enter` for a trust dialog. Tell the user which prompt it is and where, and carry on with the work
-  that does not need that agent.
+- An agent you started that stops on a prompt: read the screen (`hc read`). A harmless prompt, as the global
+  `AGENTS.md` defines it under Silent blockers (a trust dialog for a folder is one), is accepted at once with
+  `hc keys`, without asking the user. Any other prompt is the user's: tell them which prompt it is and where, and
+  carry on with the work that does not need that agent.
 - `hc send` delivers a message, never a command: the text reaches the other agent marked as coming from you, so a
   slash command sent this way (`/compact`, for example) is read as plain text and does nothing.
 - Long or slow commands (builds, installs, deploys, tests) run in an hc terminal, not in your own shell.

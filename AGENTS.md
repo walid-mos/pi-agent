@@ -77,10 +77,13 @@ first, and report it.
 - **Silent blockers**: losing time on something that will not unblock by itself (a permission or trust prompt, an
   agent you started that sits at a prompt or never took its task, a missing access or secret, a delay imposed by a
   tool or a registry, a decision that is the user's) without the user knowing. As soon as you meet one, take the
-  intended non-blocking path if there is one, never a hack (answering a permission prompt in the user's place,
-  forcing input past it, disabling or loosening the check that blocks). Otherwise tell the user at once what is
-  blocked, the exact action that unblocks it and what you carry on with meanwhile, then carry on with it. A blocker
-  met by an agent you started is yours to pass on to the user the same way.
+  intended non-blocking path if there is one, never a hack (forcing input past a check, disabling or loosening the
+  check that blocks). Otherwise tell the user at once what is blocked, the exact action that unblocks it and what you
+  carry on with meanwhile, then carry on with it. A blocker met by an agent you started is yours to pass on to the
+  user the same way, with one exception: a harmless prompt of that agent is yours to accept at once, without asking.
+  Harmless means a trust prompt for a folder of the user's machine, or a permission prompt for an action that
+  destroys nothing, can be undone and reaches nobody outside the machine. A prompt for anything else stays the
+  user's.
 
 ## Secrets
 
