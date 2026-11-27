@@ -116,6 +116,8 @@ it in a visible window, which takes their focus, so only after their yes.
    `pi-chromium ensure --headed` (it refuses while a headless browser runs).
 3. Open a new e2e session and redo the steps up to that page: a headless session cannot be made visible. A bot check
    often passes by itself in the visible window; otherwise tell the user exactly what to do there, and wait.
+   A visible browser serves one session: once it closed, `open_session` fails (`ENGINE_FAILURE: Browser context
+   management is not supported`). Run `pi-chromium stop` and `pi-chromium ensure --headed` again; the user's yes holds.
 4. When done: close the session, then `pi-chromium stop`, so the next session starts headless again.
 
 A one-time code of the agent's own item never needs the user: type `<name>.totp`.
