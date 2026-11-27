@@ -51,8 +51,8 @@ Never use one for another's job: a browser to read an article or an X post costs
 
 - e2e (target `chromium`) and `chrome` share one Chromium owned by `~/.local/bin/pi-chromium`. It stops by itself
   a while after the last page on a site closed (a session still on the start page does not keep it running).
-- Open a Chromium session through e2e. For a user-approved visible session, first run `pi-chromium ensure --headed`
-  so e2e opens its window in the shared browser.
+- Opening an e2e Chromium session is the only thing that starts it, headless. Never start a browser another way than
+  that and "A page that needs the user" below.
 - `pi-chromium status` when a session fails to open; `pi-chromium stop` only when the user asks: it ends every
   agent's Chromium sessions.
 - A session whose browser stopped (idle, or `pi-chromium stop`) fails with `APP_NOT_OPEN`: close it and open a new one.
@@ -104,6 +104,21 @@ how it works); you never see a password.
 - Never leave an item `unverified-new` or `unverified-rotation` without telling the user.
 - A secret typed into a plain input shows in screenshots, and recordings are never masked: record nothing around a
   login.
+
+## A page that needs the user
+
+A bot check that a headless browser does not pass, a code sent to the user's phone, a push approval: the user does
+it in a visible window, which takes their focus, so only after their yes.
+
+1. Stop, say what the page asks, and ask whether you may open a visible browser. Wait for the answer.
+2. On yes: `curl -s http://127.0.0.1:9322/json/list` must list no page but `about:blank` and e2e start pages;
+   otherwise another agent is working in the shared browser: say so and stop. Then `pi-chromium stop` and
+   `pi-chromium ensure --headed` (it refuses while a headless browser runs).
+3. Open a new e2e session and redo the steps up to that page: a headless session cannot be made visible. A bot check
+   often passes by itself in the visible window; otherwise tell the user exactly what to do there, and wait.
+4. When done: close the session, then `pi-chromium stop`, so the next session starts headless again.
+
+A one-time code of the agent's own item never needs the user: type `<name>.totp`.
 
 ## The e2e command and repositories
 
