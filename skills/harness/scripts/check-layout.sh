@@ -1,6 +1,6 @@
 #!/bin/sh
 # check-layout.sh <repository>... : checks that a repository holding Pi resources follows references/nomenclature.md:
-# the layout and names of extensions/ and prompts/, then every skill of skills/ with check-skill.sh.
+# no CLAUDE.md, the layout and names of extensions/ and prompts/, then every skill of skills/ with check-skill.sh.
 # Prints one line per problem, nothing on success. Exit status: 0 = clean, 1 = at least one problem, 2 = usage error.
 set -u
 
@@ -17,6 +17,8 @@ kebab() { printf '%s' "$1" | grep -Eq "$KEBAB"; }
 for repo in "$@"; do
   repo=${repo%/}
   [ -d "$repo" ] || { echo "$repo: not a directory" >&2; exit 2; }
+
+  [ ! -e "$repo/CLAUDE.md" ] || fail "$repo/CLAUDE.md: the only CLAUDE.md allowed is the global ~/.claude/CLAUDE.md"
 
   for p in "$repo"/extensions/*; do
     [ -e "$p" ] || continue

@@ -24,13 +24,13 @@ tests/<script>.test.sh
 - The test of an extension module sits beside it. The test of a skill's script goes in `tests/` at the root of the
   repository, because every file of a skill directory must be one its `SKILL.md` names.
 - A skill directory holds `SKILL.md`, `references/`, `scripts/` and `assets/`, nothing else.
-- A `pi-<domain>` repository has an `AGENTS.md` and a `CLAUDE.md` whose only content is a pointer to it, so that Pi
-  and Claude Code read the same rules.
+- A repository's rules are in its `AGENTS.md`. None of our repositories has a `CLAUDE.md`: the only one allowed is
+  the global `~/.claude/CLAUDE.md`, which sends Claude Code to Pi's global `AGENTS.md`.
 
 ## Names
 
 - Every directory and file name is lowercase kebab-case with whole words (`copy-secret.sh`, not `cpsecret.sh`).
-  `SKILL.md`, `AGENTS.md`, `CLAUDE.md` and `README.md` keep the capitals their readers expect.
+  `SKILL.md`, `AGENTS.md` and `README.md` keep the capitals their readers expect.
 - A skill is named after the tool when it holds our rules for one tool, otherwise after the activity. A skill, an
   extension or a prompt of a `pi-<domain>` repository starts with `<domain>-`, or is `<domain>` alone, so that its
   name shows where it comes from once it is loaded next to the public ones.
