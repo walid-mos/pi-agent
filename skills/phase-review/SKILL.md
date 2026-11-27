@@ -13,6 +13,8 @@ a terminal started as the `herdr` skill says.
 - One simplify pass and one code review per phase of a plan, each over the whole phase: never one per commit, per
   file or per module. Each reviewer rebuilds the same context, a narrow one cannot fix what it finds next to its
   files, and what is duplicated across modules only shows over the whole phase.
+- A phase that changed fewer than 50 lines of code gets no reviewer (`git diff --shortstat <range>` on the code,
+  documentation left out): below that a reviewer costs more than it finds.
 - Commit the phase first and give the reviewer its commit range, so that the reviewer's edits are the only
   uncommitted changes when it ends. Its edits mixed with yours cannot be told apart afterwards.
 - Phases in different repositories do not depend on each other: start their reviewers together, and start the next
