@@ -50,7 +50,7 @@ scripts/pishot.sh --out <scratch>/end.png --step key:ctrl+o --step shot:<scratch
   reports theme errors under `[Theme conflicts]` (raise `--rows` when the list is cut).
 - Each PNG has a `.txt` twin with the screen text: search it rather than reading the image for text.
 - Write captures to a scratch directory, never in a repository: they are for looking, not tests, and
-  `~/.pi/agent/AGENTS.md` only allows tests that TDD produced.
+  `~/.pi/agent/AGENTS.md` allows a test only for a known bug.
 
 Read every PNG with your image-reading tool and, for each element you changed, check:
 

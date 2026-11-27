@@ -29,8 +29,8 @@ a terminal started as the `herdr` skill says.
 
 ## Its findings
 
-- A finding you can show (a failing run, or the lines that are wrong) and that breaks something is fixed, test
-  first when it changes behaviour.
+- A finding you can show (a failing run, or the lines that are wrong) and that breaks something is a known bug: it
+  is fixed with its test first, as the global `AGENTS.md` says. A reviewer writes no other test.
 - The user is asked only about a finding that needs their decision: say in one or two plain sentences what goes
   wrong, in which real situation, and what you recommend. A finding that needs a situation the user's setup never
   meets is dropped, not reported.

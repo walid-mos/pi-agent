@@ -46,9 +46,9 @@ first, and report it.
 
 - **Tautological tests**: a test that cannot fail when the behaviour it names is broken. It asserts what a mock was
   told to return, recomputes the expected value with the implementation's own logic, or only checks that code ran.
-- **Tests outside red-green-refactor before QA**: until a feature has been battle-tested by QA, its only tests are the
-  ones TDD produces: written before the code, seen failing for the expected reason, then made to pass. No test added
-  after the fact, for coverage or as a broad suite before that point.
+- **Tests without a known bug**: a test is written for one reason, to keep a known bug from coming back: reproduce
+  the bug in a test, see it fail for that reason, then fix the bug. New code gets no test, before or after it is
+  written, for coverage or as a suite. The tests a repository already has stay, and are kept passing.
 - **Hidden state machines**: behaviour that depends on a state nobody declared, such as a combination of booleans,
   nullable fields or the order of calls. When something has states, name them in one type and write the transitions
   in one place.
