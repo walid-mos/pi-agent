@@ -1,6 +1,6 @@
 ---
 name: harness
-description: Our rules for authoring agent skills, for Pi and Claude Code alike - whether a rule belongs in a skill at all, where it goes, how a skill is named and its description routes, what a body may contain, how bundled scripts behave and how a skill is checked. Use before creating, editing, renaming, splitting, merging, reviewing or deleting any skill - a SKILL.md, its name or description, or any script, reference or asset in a skill directory - whether the skill is ours, a project's, vendored or loaded by Claude Code only (`~/.claude/skills`, a project's `.claude/skills`), even for a one-line change.
+description: Our rules for authoring agent skills, for Pi and Claude Code alike, and for naming and placing every resource Pi loads - whether a rule belongs in a skill at all, where it goes, how a skill, a script, an extension or a prompt template is named and laid out, how a description routes, what a body may contain, how bundled scripts behave and how the result is checked. Use before creating, editing, renaming, splitting, merging, reviewing or deleting any skill - a SKILL.md, its name or description, or any script, reference or asset in a skill directory - whether the skill is ours, a project's, vendored or loaded by Claude Code only (`~/.claude/skills`, a project's `.claude/skills`), and before creating, renaming or moving an extension, a prompt template or one of their files, even for a one-line change. What an extension does and how it is tested stay with `pi-config`.
 ---
 
 # Harness: authoring skills
@@ -14,13 +14,13 @@ Pi's manual,
 `~/.pi/agent/install/releases/$(cat ~/.pi/agent/install/current-version)/node_modules/@earendil-works/pi-coding-agent/docs/`,
 rather than relying on memory.
 
-## 1. Know why the change exists
+## Know why the change exists
 
 A rule enters a skill for one of two reasons: an agent made a mistake that was seen (what was asked, what it did, what it
 should have done), or the user stated the rule. Write that reason in one sentence; it goes in the commit message, not
 in the skill. If there is neither, there is nothing to encode: tell the user and stop.
 
-## 2. Put it in the right place
+## Put it in the right place
 
 | The rule... | Goes in |
 |---|---|
@@ -39,18 +39,19 @@ Our rules about a vendored skill's product go in a skill of ours whose descripti
 `infisical` does). Extend an existing skill before creating a new one; a new skill needs a kind of task no existing
 description covers.
 
-## 3. Name and description
+## Name and description
 
-- Name the skill after the tool or the activity it covers (`tailscale`, `infisical`, `writing-migrations`): lowercase,
-  digits and single hyphens, the same as its directory. Never a vague name (`helper`, `utils`, `tools`, `misc`) or one
-  containing `anthropic` or `claude`. Follow the pattern of the skills next to it.
+- Read [references/nomenclature.md](references/nomenclature.md) before naming, creating, renaming or moving a skill,
+  one of its files, an extension or a prompt template: it holds the layout and the names all our repositories share.
+- Name the skill after the tool or the activity it covers (`tailscale`, `infisical`, `writing-migrations`), the same
+  as its directory. Never a vague name (`helper`, `utils`, `tools`, `misc`) or one containing `anthropic` or `claude`.
 - One clause on what the skill covers, then `Use when ...` with the situations and the words a user would actually say.
 - No workflow steps: an agent that finds the steps in the description follows them and skips the body.
 - Third person, one line, at most 1024 characters.
 - If the skill must load for a whole class of actions, name every action and add `even for a one-line change`.
 - If it overlaps another skill, name that skill and say which one wins.
 
-## 4. Body
+## Body
 
 - Keep only what a capable agent would not know or would get wrong here: our decisions, our constraints, traps we hit,
   exact commands. No general explanations, no tour of files the agent can list itself.
@@ -73,14 +74,14 @@ description covers.
   machines. Such values are read at run time, see the `infisical` skill.
 - Everything is in English.
 
-## 5. Size and references
+## Size and references
 
 Keep `SKILL.md` under 500 lines. When a section serves only some of the skill's tasks, move it to a file in
 `references/` and link it from `SKILL.md` with the situation in which to read it. Link every reference file directly
 from `SKILL.md` (an agent reading a file it reached through another reference often reads only its first lines), and
 start any reference longer than 100 lines with a `## Contents` list.
 
-## 6. Scripts
+## Scripts
 
 - A deterministic operation is a script in `scripts/`, and `SKILL.md` says whether to run it or to read it.
 - The script handles its own errors, says what to do about them, and exits non-zero.
@@ -88,10 +89,13 @@ start any reference longer than 100 lines with a `## Contents` list.
   It never prints a secret.
 - Every constant carries a comment giving its reason. `SKILL.md` lists the tools the script needs.
 
-## 7. Before you finish
+## Before you finish
 
-- [ ] `sh scripts/check.sh <skill-dir>` (path relative to this skill) prints nothing. It checks the frontmatter, the
-      size limits and that bundled files and their mentions match.
+- [ ] `sh scripts/check-skill.sh <skill-dir>` (path relative to this skill) prints nothing. It checks the frontmatter,
+      the title, the names, the size limits and that bundled files and their mentions match.
+- [ ] After creating, renaming or moving a skill, an extension or a prompt template:
+      `sh scripts/check-layout.sh <repository>` prints nothing. It checks the layout and names of the repository's
+      extensions and prompt templates, then each of its skills with `check-skill.sh`.
 - [ ] Reread the whole skill as an agent that has nothing else. Delete every line that agent would not miss.
 - [ ] Renaming or deleting a skill: search the other skills, the `AGENTS.md` files and `README.md` for its name and fix
       every mention in the same change.

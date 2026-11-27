@@ -1,5 +1,5 @@
 #!/bin/sh
-# check.sh <skill-dir>... : mechanical checks on our skills. Prints one line per problem, nothing on success.
+# check-skill.sh <skill-dir>... : mechanical checks on our skills. Prints one line per problem, nothing on success.
 # Exit status: 0 = clean, 1 = at least one problem, 2 = usage error.
 set -u
 
@@ -7,8 +7,10 @@ NAME_MAX=64          # Agent Skills specification: name is 1-64 characters
 DESC_MAX=1024        # Agent Skills specification: description is 1-1024 characters
 BODY_MAX=500         # Agent Skills specification: keep SKILL.md under 500 lines
 TOC_FROM=100         # past this length a reference file is often read partially, so it needs a table of contents
+# references/nomenclature.md: every name is lowercase kebab-case, with any number of extensions (.test.ts)
+KEBAB='^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+)*$'
 
-[ $# -ge 1 ] || { echo "usage: sh check.sh <skill-dir>..." >&2; exit 2; }
+[ $# -ge 1 ] || { echo "usage: sh check-skill.sh <skill-dir>..." >&2; exit 2; }
 
 status=0
 for dir in "$@"; do
@@ -47,6 +49,39 @@ for dir in "$@"; do
         fail "description never says when to load the skill (add 'Use when ...')"
       ;;
   esac
+
+  case "$desc" in
+    "Our rules for "*) ;;
+    *) fail "description must start with 'Our rules for ' (references/nomenclature.md)" ;;
+  esac
+
+  title=$(sed "1,${end}d" "$f" | grep -m 1 '^# ')
+  printf '%s' "$title" | grep -Eq '^# [^:]+: .+' ||
+    fail "title '$title' must be '# <Name>: <what it covers>' (references/nomenclature.md)"
+  sed "1,${end}d" "$f" | grep -En '^#+ +[0-9]+[.)] ' | while IFS= read -r line; do
+    echo "$f: numbered heading '${line#*:}' (references/nomenclature.md)"
+  done
+  sed "1,${end}d" "$f" | grep -Eq '^#+ +[0-9]+[.)] ' && status=1
+
+  # Names and layout of the skill directory.
+  for p in "$dir"/* "$dir"/.[!.]*; do
+    [ -e "$p" ] || continue
+    case "$(basename "$p")" in
+      SKILL.md|references|scripts|assets) ;;
+      *) fail "$(basename "$p") is not SKILL.md, references/, scripts/ or assets/" ;;
+    esac
+  done
+  for sub in scripts references assets; do
+    [ -d "$dir/$sub" ] || continue
+    for p in "$dir/$sub"/*; do
+      [ -e "$p" ] || continue
+      base=$(basename "$p")
+      printf '%s' "$base" | grep -Eq "$KEBAB" || fail "$sub/$base is not lowercase kebab-case"
+      if [ "$sub" = scripts ]; then
+        case "${base%%.*}" in *-*) ;; *) fail "scripts/$base must be named <verb>-<object>" ;; esac
+      fi
+    done
+  done
 
   body=$(($(wc -l < "$f") - end))
   [ "$body" -le "$BODY_MAX" ] ||
