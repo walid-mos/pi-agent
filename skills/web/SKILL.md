@@ -126,6 +126,9 @@ A one-time code of the agent's own item never needs the user: type `<name>.totp`
 
 - The e2e tooling is pinned in `~/.config/pi/pi-vendor/packages/web-tools`, and `e2e` on the PATH is that install:
   never `npx e2e`, `e2e@latest` or another install. To change a version, follow that package's `README.md`.
+- Any other package the vendored skill tells you to run with `npx` is not in the pinned tooling: `npx` would download
+  and run its latest release, which nobody reviewed. Never run one; when a task needs it, tell the user, who decides
+  whether it joins the tooling.
 - Never `e2e init`, and never an e2e config or results in a repository, unless that repository's `AGENTS.md` records
   the user's decision. A repository's own `e2e run` uses its own config and browsers, never the shared Chromium.
 - `.e2e/` and `.pi/` are ignored in every repository by the global git ignore, `~/.config/git/ignore`, which says how
