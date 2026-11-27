@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: Our rules for front-end work - how a page is structured, where UI components come from, how their code enters a project and what draws a diagram. Use when building, changing or reviewing a user interface - a web page, a component, a layout, styles, a React, Vue, Svelte, HTML or CSS file, a standalone HTML file or an HTML artifact, a landing page, a dashboard, a prototype, a diagram, a schema, a flowchart, an architecture or data-model view - and before adding a UI component, a UI library or any front-end dependency, even for a one-line change. Emil Kowalski's vendored skills (`emil-design-eng`, `animate`, `pick-ui-library` and the others) cover motion and polish; where one of them disagrees with this skill, this one wins.
+description: Our rules for front-end work - how a page is structured, where UI components come from, how their code enters a project, what draws a diagram or a chart and how a dashboard is built. Use when building, changing or reviewing a user interface - a web page, a component, a layout, styles, a React, Vue, Svelte, HTML or CSS file, a standalone HTML file or an HTML artifact, a landing page, a dashboard, a prototype, a chart, a graph, a KPI tile, a diagram, a schema, a flowchart, an architecture or data-model view - and before adding a UI component, a UI library or any front-end dependency, even for a one-line change. Emil Kowalski's vendored skills (`emil-design-eng`, `animate`, `pick-ui-library` and the others) cover motion and polish; where one of them disagrees with this skill, this one wins.
 ---
 
 # Frontend
@@ -71,6 +71,62 @@ label, laid out by hand, is the result the user rejects.
 - Before a diagram of more than a hundred nodes, read https://reactflow.dev/learn/advanced-use/performance.
 - Never hide the React Flow attribution (`proOptions.hideAttribution`): its authors allow that to Pro subscribers
   only. If it has to go, ask the user.
+
+## Charts and dashboards
+
+Every chart is drawn with Apache ECharts (https://echarts.apache.org), a capability dependency, and with nothing
+else: no second chart library for one chart type or one page, no chart drawn by hand in SVG, sparklines included.
+One library is what makes every chart of a product look and behave alike, and ECharts is the one that runs without
+React and stays fast on large series. shadcn's chart component is Recharts: do not take it. When ECharts cannot
+draw what is asked, say so to the user.
+
+Write from the ECharts handbook and option reference, read each time.
+
+- A chart needs no React: `echarts.init` on an element of a static page. Charts alone are never a reason for an
+  island. Inside an island that exists for another reason, a chart goes through one wrapper component written in
+  the project, never a wrapper package.
+- Import from `echarts/core` and register, in one module, only the chart types and components the project uses.
+  The full build is for a standalone HTML file only.
+
+### Look
+
+ECharts' default look is never delivered.
+
+- One theme module per project builds the ECharts theme from the design tokens, read at run time from the page's
+  CSS custom properties (the canvas does not resolve `var()`), registers it, and switches it with `setTheme` when the
+  page's theme changes. A chart's option holds data and structure, never a colour, a font or a spacing.
+- The theme removes what carries no data: no border or background on a chart, no axis line or ticks on a value
+  axis, horizontal split lines only, in the muted token. Text is the interface's font, with tabular numerals.
+- A colour means one thing across the product: a series keeps its colour in every chart. The categorical palette
+  comes from the tokens and stops at six series; the rest is grouped as one "Other". When a chart makes one point,
+  that series takes the accent and the others the muted token.
+- A legend appears only with more than one series, and a series is labelled at its line when there is room.
+- One tooltip formatter serves every chart, and one module formats every number, date and unit (`Intl`) for axes,
+  tooltips, tiles and tables alike.
+- No pie or donut beyond three slices, no second value axis, no 3D, no gradient fill that encodes nothing: each
+  one is a default an agent reaches for and each makes the data harder to read.
+
+### Dashboard
+
+- The page structure rule holds: a dashboard view shows its KPI tiles and its charts without scrolling, and what
+  does not fit is another view.
+- A KPI tile shows the value with its unit, the change against a period it names, and a sparkline.
+- A chart or a tile is in one of four declared states: loading (a skeleton at the final size, so nothing shifts),
+  empty (saying for which filter), failed (showing the cause, never an empty or zeroed chart in its place), ready.
+- A filter (period, segment) applies to the whole view and lives in the URL, so a view can be reloaded and shared.
+- Charts that share an axis are linked with `echarts.connect`, so the pointer and the zoom move them together.
+
+### Speed
+
+- Aggregate where the data lives, to the resolution displayed: the browser does not receive raw rows a query could
+  have grouped. A line with more points than its width in pixels sets `sampling: 'lttb'`.
+- Charts reading the same rows share one `dataset`.
+- New data, a new filter or a live tick is a `setOption` on the existing instance, with the data only. Never
+  dispose and re-create a chart to update it, and turn the update animation off when ticks come faster than it
+  lasts.
+- Create a chart when its view is shown, since its container must have a size at `init`. Resize it from a
+  `ResizeObserver` on its container, and `dispose` it when the container is removed.
+- Under `prefers-reduced-motion`, charts are created with `animation: false`.
 
 ## Components are vendored, never installed
 
